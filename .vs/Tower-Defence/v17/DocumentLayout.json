@@ -1,14 +1,14 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "D:\\Tower-Defence\\",
+  "WorkspaceRootPath": "C:\\Users\\vejas\\Documents\\DAE\\projects\\Programming_1\\GameProject\\Actual\\Tower-Defence\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\Tower-Defence\\Game\\Game\\Game.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Game\\Game\\Game.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\vejas\\Documents\\DAE\\projects\\Programming_1\\GameProject\\Actual\\Tower-Defence\\README.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:README.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\Tower-Defence\\README.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:README.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\vejas\\Documents\\DAE\\projects\\Programming_1\\GameProject\\Actual\\Tower-Defence\\Game\\Game\\Game.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Game\\Game\\Game.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     }
   ],
   "DocumentGroupContainers": [
@@ -18,7 +18,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 2,
           "Children": [
             {
               "$type": "Bookmark",
@@ -26,11 +26,11 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "Game.cpp",
-              "DocumentMoniker": "D:\\Tower-Defence\\Game\\Game\\Game.cpp",
+              "DocumentMoniker": "C:\\Users\\vejas\\Documents\\DAE\\projects\\Programming_1\\GameProject\\Actual\\Tower-Defence\\Game\\Game\\Game.cpp",
               "RelativeDocumentMoniker": "Game\\Game\\Game.cpp",
-              "ToolTip": "D:\\Tower-Defence\\Game\\Game\\Game.cpp",
+              "ToolTip": "C:\\Users\\vejas\\Documents\\DAE\\projects\\Programming_1\\GameProject\\Actual\\Tower-Defence\\Game\\Game\\Game.cpp",
               "RelativeToolTip": "Game\\Game\\Game.cpp",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
@@ -39,15 +39,16 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 0,
               "Title": "README.md",
-              "DocumentMoniker": "D:\\Tower-Defence\\README.md",
+              "DocumentMoniker": "C:\\Users\\vejas\\Documents\\DAE\\projects\\Programming_1\\GameProject\\Actual\\Tower-Defence\\README.md",
               "RelativeDocumentMoniker": "README.md",
-              "ToolTip": "D:\\Tower-Defence\\README.md",
+              "ToolTip": "C:\\Users\\vejas\\Documents\\DAE\\projects\\Programming_1\\GameProject\\Actual\\Tower-Defence\\README.md",
               "RelativeToolTip": "README.md",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAAAjAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
-              "WhenOpened": "2025-11-25T18:36:45.496Z"
+              "WhenOpened": "2025-11-25T18:36:45.496Z",
+              "EditorCaption": ""
             }
           ]
         }
