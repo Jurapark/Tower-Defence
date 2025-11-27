@@ -179,11 +179,9 @@ void SelectAndPlace(Rectf& itemPrm) {
 		itemPrm.left = g_MouseX - (itemPrm.width / 2);
 		itemPrm.top = g_MouseY - (itemPrm.height / 2);
 	}
-
-//	std::cout << g_MouseX << ' ' << g_MouseY << '\n';
 }
 
-void ShowClickedSquare()
+void ShowClickedSquare() // make it to a changeable variable
 {
 	Rectf clickedSquare
 	{
@@ -194,7 +192,7 @@ void ShowClickedSquare()
 	{
 		if (g_Intersections[index].x <= g_MouseX && (g_Intersections[index].x + g_GridSize) >= g_MouseX)
 		{
-			clickedSquare.left = g_Intersections[index].x;
+			g_Item1.left = g_Intersections[index].x;
 		}
 	}
 
@@ -202,10 +200,10 @@ void ShowClickedSquare()
 	{
 		if ((g_Intersections[index * g_CollumnAmount].y) <= g_MouseY && (g_Intersections[index * g_CollumnAmount].y + g_GridSize) >= g_MouseY)
 		{
-			clickedSquare.top = g_Intersections[index * g_CollumnAmount].y;
+			g_Item1.top = g_Intersections[index * g_CollumnAmount].y;
 		}
 	}
 
-	utils::FillRect(clickedSquare);
+	//utils::FillRect(clickedSquare);
 }
 #pragma endregion ownDefinitions
