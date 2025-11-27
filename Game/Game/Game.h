@@ -16,7 +16,16 @@ float g_WindowHeight{ 720 };
 #pragma region ownDeclarations
 // Declare your own global variables here
 
+Color4f g_White{
+	1.f,1.f,1.f,1.f
+}, g_Green{
+	0.f,1.f,0.f,1.f
+};
 
+float g_MouseX{};
+float g_MouseY{};
+
+Texture g_Obama;
 const int g_CollumnAmount{13},
 g_RowAmount{7},
 g_GridAmount{ g_CollumnAmount * g_RowAmount };
@@ -28,12 +37,22 @@ float g_GridSize{ 80.f };
 
 Point2f g_Intersections[g_GridAmount]{ Point2f{0.f, 0.f} };
 
+Rectf g_Item1{
+	g_GridSize * (g_CollumnAmount + 1),
+	g_GridSize,
+	g_GridSize,
+	g_GridSize
+};
+
 
 // Declare your own functions here
-
+void InitializeTextures();
 void GenerateGridPositions();
 void CheckGridPositions();
 void DrawGrid();
+void DrawItems(Rectf itemPos, Texture texture);
+void DeleteTextures();
+static void SelectAndPlace(Rectf& itemPrm);
 
 #pragma endregion ownDeclarations
 

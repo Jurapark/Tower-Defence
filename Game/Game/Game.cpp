@@ -6,6 +6,7 @@
 #pragma region gameFunctions											
 void Start()
 {
+	InitializeTextures();
 	GenerateGridPositions();
 }
 
@@ -14,6 +15,8 @@ void Draw()
 	ClearBackground();
 
 	DrawGrid();
+	DrawItems(g_Item1, g_Obama);
+	SelectAndPlace(g_Item1);
 
 }
 
@@ -35,7 +38,7 @@ void Update(float elapsedSec)
 
 void End()
 {
-	// free game resources here
+	DeleteTextures();
 }
 #pragma endregion gameFunctions
 
@@ -65,10 +68,8 @@ void OnKeyUpEvent(SDL_Keycode key)
 
 void OnMouseMotionEvent(const SDL_MouseMotionEvent& e)
 {
-	// SAMPLE CODE: print mouse position
-	//const float mouseX{ float(e.x) };
-	//const float mouseY{ float(e.y) };
-	//std::cout << "  [" << mouseX << ", " << mouseY << "]\n";
+	g_MouseX = float(e.x);
+	g_MouseY = float(e.y);
 }
 
 void OnMouseDownEvent(const SDL_MouseButtonEvent& e)
@@ -105,6 +106,15 @@ void OnMouseUpEvent(const SDL_MouseButtonEvent& e)
 #pragma region ownDefinitions
 // Define your own functions here
 
+void InitializeTextures() {
+	if (!TextureFromFile("Resources/Obama.jpg", g_Obama)) {
+		std::cout << "Obama didnt load '\n";
+	}
+}
+void DeleteTextures() {
+	DeleteTexture(g_Obama);
+}
+
 void GenerateGridPositions()
 {
 	for (int row{ 0 }; row < g_RowAmount; ++row)
@@ -119,6 +129,7 @@ void GenerateGridPositions()
 
 void DrawGrid()
 {
+	SetColor(g_White);
 	for (int index{ 0 }; index <= g_RowAmount; ++index)
 	{
 		utils::DrawLine(Point2f{ 0.f , g_GridSize + g_GridSize * index }, Point2f{ g_GameWindowWidth , g_GridSize + g_GridSize * index });
@@ -139,4 +150,16 @@ void CheckGridPositions()
 	}
 }
 
+void DrawItems(Rectf itemPos, Texture texture) {
+	DrawTexture(texture, itemPos);
+}
+void SelectAndPlace(Rectf& itemPrm) {
+	if (g_MouseX > itemPrm.left && g_MouseX < itemPrm.left + itemPrm.width && g_MouseY > itemPrm.top && g_MouseY < itemPrm.top + itemPrm.height) {
+		float middleOfItemX{ itemPrm.left + (itemPrm.width / 2) };
+		float middleOfItemY{ itemPrm.top + (itemPrm.height / 2) };
+		SetColor(g_Green);
+		DrawRect(itemPrm, 2.f);
+	}
+	std::cout << g_MouseX << ' ' << g_MouseY << '\n';
+}
 #pragma endregion ownDefinitions

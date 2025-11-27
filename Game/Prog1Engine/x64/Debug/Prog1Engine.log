@@ -1,17 +1,7 @@
-﻿  
-  
-      Directory: D:\Tower-Defence\Game
-  
-  
-  Mode                 LastWriteTime         Length Name                                                                 
-  ----                 -------------         ------ ----                                                                 
-  d-----        2025-11-25     19:38                Resources                                                            
-  
-  
-  pch.cpp
+﻿  pch.cpp
   Core.cpp
   main.cpp
   structs.cpp
   utils.cpp
   Generating Code...
-  Prog1Engine.vcxproj -> D:\Tower-Defence\Game\x64\Debug\Prog1Engine.lib
+  Prog1Engine.vcxproj -> C:\Users\vejas\Documents\DAE\projects\Programming_1\GameProject\Actual\Tower-Defence\Game\x64\Debug\Prog1Engine.lib
