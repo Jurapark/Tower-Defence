@@ -75,10 +75,9 @@ void OnMouseMotionEvent(const SDL_MouseMotionEvent& e)
 
 void OnMouseDownEvent(const SDL_MouseButtonEvent& e)
 {
-	// SAMPLE CODE: print mouse position
-	//const float mouseX{ float(e.x) };
-	//const float mouseY{ float(e.y) };
-	//std::cout << "  [" << mouseX << ", " << mouseY << "]\n";
+	if (e.button == SDL_BUTTON_LEFT && g_MouseOnItem==true) {
+		g_LeftClickToggled = !g_LeftClickToggled;
+	}
 }
 
 void OnMouseUpEvent(const SDL_MouseButtonEvent& e)
@@ -160,7 +159,18 @@ void SelectAndPlace(Rectf& itemPrm) {
 		float middleOfItemY{ itemPrm.top + (itemPrm.height / 2) };
 		SetColor(g_Green);
 		DrawRect(itemPrm, 2.f);
+		g_MouseOnItem = true;
+	}
+	else if (g_LeftClickToggled == false) {
+		g_MouseOnItem = false;
+	}
+	if (g_MouseX > g_CollumnAmount * g_GridSize) {
+		g_MouseInGrid = true;
 	}
 	std::cout << g_MouseX << ' ' << g_MouseY << '\n';
+	if (g_MouseOnItem == true && g_LeftClickToggled == true && g_MouseInGrid == true) {
+		itemPrm.left = g_MouseX - (itemPrm.width / 2);
+		itemPrm.top = g_MouseY - (itemPrm.height / 2);
+	}
 }
 #pragma endregion ownDefinitions

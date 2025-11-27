@@ -43,7 +43,9 @@ Rectf g_Item1{
 	g_GridSize,
 	g_GridSize
 };
-
+bool g_LeftClickToggled{ false };
+bool g_MouseOnItem{ false };
+bool g_MouseInGrid{ false };
 
 // Declare your own functions here
 void InitializeTextures();
@@ -52,7 +54,7 @@ void CheckGridPositions();
 void DrawGrid();
 void DrawItems(Rectf itemPos, Texture texture);
 void DeleteTextures();
-static void SelectAndPlace(Rectf& itemPrm);
+static void SelectAndPlace(Rectf & itemPrm);
 
 #pragma endregion ownDeclarations
 
