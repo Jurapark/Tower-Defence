@@ -8,6 +8,7 @@ void Start()
 {
 	InitializeTextures();
 	GenerateGridPositions();
+	//add comment
 }
 
 void Draw()
