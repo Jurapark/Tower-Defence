@@ -53,6 +53,7 @@ void DrawGrid();
 void DrawItems(Rectf itemPos, Texture texture);
 void DeleteTextures();
 static void SelectAndPlace(Rectf& itemPrm);
+void ShowClickedSquare(); // goes in draw
 
 #pragma endregion ownDeclarations
 

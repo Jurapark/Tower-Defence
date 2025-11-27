@@ -9,6 +9,10 @@ void Start()
 	InitializeTextures();
 	GenerateGridPositions();
 	//add comment
+	for (int index{ 0 }; index < g_GridAmount; ++index)
+	{
+		std::cout << "Coordinates at : {" << g_Intersections[index].x << ", " << g_Intersections[index].y << "}\n";
+	}
 }
 
 void Draw()
@@ -18,7 +22,7 @@ void Draw()
 	DrawGrid();
 	DrawItems(g_Item1, g_Obama);
 	SelectAndPlace(g_Item1);
-
+	ShowClickedSquare();
 }
 
 void Update(float elapsedSec)
@@ -112,6 +116,7 @@ void InitializeTextures() {
 		std::cout << "Obama didnt load '\n";
 	}
 }
+
 void DeleteTextures() {
 	DeleteTexture(g_Obama);
 }
@@ -122,8 +127,8 @@ void GenerateGridPositions()
 	{
 		for (int collumn{ 0 }; collumn < g_CollumnAmount; ++collumn)
 		{
-			g_Intersections[row * g_CollumnAmount + collumn].x = g_GridSize + g_GridSize * collumn;
-			g_Intersections[row * g_CollumnAmount + collumn].y = 2 * g_GridSize + g_GridSize * row;
+			g_Intersections[row * g_CollumnAmount + collumn].x = g_GridSize * collumn;
+			g_Intersections[row * g_CollumnAmount + collumn].y = g_GridSize + g_GridSize * row;
 		}
 	}
 }
@@ -154,6 +159,7 @@ void CheckGridPositions()
 void DrawItems(Rectf itemPos, Texture texture) {
 	DrawTexture(texture, itemPos);
 }
+
 void SelectAndPlace(Rectf& itemPrm) {
 	if (g_MouseX > itemPrm.left && g_MouseX < itemPrm.left + itemPrm.width && g_MouseY > itemPrm.top && g_MouseY < itemPrm.top + itemPrm.height) {
 		float middleOfItemX{ itemPrm.left + (itemPrm.width / 2) };
@@ -161,6 +167,32 @@ void SelectAndPlace(Rectf& itemPrm) {
 		SetColor(g_Green);
 		DrawRect(itemPrm, 2.f);
 	}
-	std::cout << g_MouseX << ' ' << g_MouseY << '\n';
+//	std::cout << g_MouseX << ' ' << g_MouseY << '\n';
+}
+
+void ShowClickedSquare()
+{
+	Rectf clickedSquare
+	{
+		0.f, 0.f, g_GridSize, g_GridSize
+	};
+
+	for (int index{ 0 }; index < g_CollumnAmount; ++index)
+	{
+		if (g_Intersections[index].x <= g_MouseX && (g_Intersections[index].x + g_GridSize) >= g_MouseX)
+		{
+			clickedSquare.left = g_Intersections[index].x;
+		}
+	}
+
+	for (int index{ 0 }; index < g_RowAmount; ++index)
+	{
+		if ((g_Intersections[index * g_CollumnAmount].y) <= g_MouseY && (g_Intersections[index * g_CollumnAmount].y + g_GridSize) >= g_MouseY)
+		{
+			clickedSquare.top = g_Intersections[index * g_CollumnAmount].y;
+		}
+	}
+
+	utils::FillRect(clickedSquare);
 }
 #pragma endregion ownDefinitions
