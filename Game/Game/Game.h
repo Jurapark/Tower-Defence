@@ -16,46 +16,67 @@ float g_WindowHeight{ 720 };
 #pragma region ownDeclarations
 // Declare your own global variables here
 
-Color4f g_White{
-	1.f,1.f,1.f,1.f
+Color4f 
+g_White{
+	1.f, 1.f, 1.f, 1.f
 }, g_Green{
-	0.f,1.f,0.f,1.f
+	0.f, 1.f, 0.f, 1.f
 };
 
-float g_MouseX{};
-float g_MouseY{};
+float 
+g_X{ 0.f },
+g_Y{ 0.f };
 
 Texture g_Obama;
-const int g_CollumnAmount{13},
+
+const int 
+g_CollumnAmount{13},
 g_RowAmount{7},
+g_ConsumableAmount{1},
 g_GridAmount{ g_CollumnAmount * g_RowAmount };
 
-const float g_GameWindowWidth{ g_WindowWidth / 16.f * 13.f },
-g_GameWindowHeight{ g_WindowHeight / 9.f * 7.f };
+const float 
+g_GameWindowWidth{ g_WindowWidth / 16.f * 13.f },
+g_GameWindowHeight{ g_WindowHeight / 9.f * 7.f },
+g_GridSquareSize{ 80.f };
 
-float g_GridSize{ 80.f };
+Point2f
+g_MousePosition{ 0.f, 0.f },
+g_TemporaryConsumableLocation{ 0.f, 0.f },
+g_arrIntersections[g_GridAmount]{ Point2f{0.f, 0.f} };
 
-Point2f g_Intersections[g_GridAmount]{ Point2f{0.f, 0.f} };
-
-Rectf g_Item1{
-	g_GridSize * (g_CollumnAmount + 1),
-	g_GridSize,
-	g_GridSize,
-	g_GridSize
+Rectf
+g_arrConsumables[g_ConsumableAmount]{ 
+	Rectf{
+		0.f,
+		0.f,
+		g_GridSquareSize,
+		g_GridSquareSize
+	} 
+},
+g_GridPosition{
+	0.f,
+	g_GridSquareSize,
+	g_GridSquareSize * g_CollumnAmount,
+	g_GridSquareSize * g_RowAmount
 };
-bool g_LeftClickToggled{ false };
-bool g_MouseOnItem{ false };
-bool g_MouseInGrid{ false };
+
+bool
+g_LeftClickToggled{ false },
+g_MoveConsumable{ false };
 
 // Declare your own functions here
 void InitializeTextures();
-void GenerateGridPositions();
+void InitializeGridPositions();
 void CheckGridPositions();
 void DrawGrid();
 void DrawItems(Rectf itemPos, Texture texture);
 void DeleteTextures();
-void SelectAndPlace(Rectf & itemPrm);
-void ShowClickedSquare(); // goes in draw
+void SelectAndMove(const Point2f& consumableLocation, float& xCoordinateDifference, float& yCoordinateDifference);
+void ClickConsumableToGrid(Rectf& consumable);
+void InitializeConsumablePositions();
+void ConsumableInteraction(Rectf& consumable);
+void PlaceConsumable(Rectf& consumable);
 
 #pragma endregion ownDeclarations
 

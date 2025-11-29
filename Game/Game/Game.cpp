@@ -7,12 +7,9 @@
 void Start()
 {
 	InitializeTextures();
-	GenerateGridPositions();
-	//add comment
-	for (int index{ 0 }; index < g_GridAmount; ++index)
-	{
-		std::cout << "Coordinates at : {" << g_Intersections[index].x << ", " << g_Intersections[index].y << "}\n";
-	}
+	InitializeGridPositions();
+	InitializeConsumablePositions();
+	//CheckGridPositions();
 }
 
 void Draw()
@@ -20,25 +17,15 @@ void Draw()
 	ClearBackground();
 
 	DrawGrid();
-	DrawItems(g_Item1, g_Obama);
-	SelectAndPlace(g_Item1);
-	ShowClickedSquare();
+	DrawItems(g_arrConsumables[0], g_Obama);
 }
 
 void Update(float elapsedSec)
 {
-	// process input, do physics 
-
-	// e.g. Check keyboard state
-	//const Uint8 *pStates = SDL_GetKeyboardState( nullptr );
-	//if ( pStates[SDL_SCANCODE_RIGHT] )
-	//{
-	//	std::cout << "Right arrow key is down\n";
-	//}
-	//if ( pStates[SDL_SCANCODE_LEFT] && pStates[SDL_SCANCODE_UP])
-	//{
-	//	std::cout << "Left and up arrow keys are down\n";
-	//}
+	if (g_MoveConsumable)
+	{
+		ConsumableInteraction(g_arrConsumables[0]);
+	}
 }
 
 void End()
@@ -73,37 +60,19 @@ void OnKeyUpEvent(SDL_Keycode key)
 
 void OnMouseMotionEvent(const SDL_MouseMotionEvent& e)
 {
-	g_MouseX = float(e.x);
-	g_MouseY = float(e.y);
+	g_MousePosition.x = static_cast<float>(e.x);
+	g_MousePosition.y = static_cast<float>(e.y);
 }
 
 void OnMouseDownEvent(const SDL_MouseButtonEvent& e)
 {
-	if (e.button == SDL_BUTTON_LEFT && g_MouseOnItem==true) {
-		g_LeftClickToggled = !g_LeftClickToggled;
-	}
+	SelectAndMove(Point2f{ g_arrConsumables[0].left, g_arrConsumables[0].top }, g_X, g_Y);
 }
 
 void OnMouseUpEvent(const SDL_MouseButtonEvent& e)
 {
-	// SAMPLE CODE: print mouse position
-	//const float mouseX{ float(e.x) };
-	//const float mouseY{ float(e.y) };
-	//std::cout << "  [" << mouseX << ", " << mouseY << "]\n";
-	
-	// SAMPLE CODE: check which mouse button was pressed
-	//switch (e.button)
-	//{
-	//case SDL_BUTTON_LEFT:
-	//	//std::cout << "Left mouse button released\n";
-	//	break;
-	//case SDL_BUTTON_RIGHT:
-	//	//std::cout << "Right mouse button released\n";
-	//	break;
-	//case SDL_BUTTON_MIDDLE:
-	//	//std::cout << "Middle mouse button released\n";
-	//	break;
-	//}
+	PlaceConsumable(g_arrConsumables[0]);
+	g_MoveConsumable = false;
 }
 #pragma endregion inputHandling
 
@@ -120,30 +89,40 @@ void DeleteTextures() {
 	DeleteTexture(g_Obama);
 }
 
-void GenerateGridPositions()
+void InitializeGridPositions()
 {
 	for (int row{ 0 }; row < g_RowAmount; ++row)
 	{
 		for (int collumn{ 0 }; collumn < g_CollumnAmount; ++collumn)
 		{
-			g_Intersections[row * g_CollumnAmount + collumn].x = g_GridSize * collumn;
-			g_Intersections[row * g_CollumnAmount + collumn].y = g_GridSize + g_GridSize * row;
+			g_arrIntersections[row * g_CollumnAmount + collumn].x = g_GridSquareSize * collumn;
+			g_arrIntersections[row * g_CollumnAmount + collumn].y = g_GridSquareSize + g_GridSquareSize * row;
 		}
+	}
+}
+
+void InitializeConsumablePositions()
+{
+	for (int index{ 0 }; index < g_ConsumableAmount; ++index)
+	{
+		g_arrConsumables[index].left = g_GridPosition.left + g_GridPosition.width + g_GridSquareSize;
+		g_arrConsumables[index].top = g_GridSquareSize + g_GridSquareSize * index;
 	}
 }
 
 void DrawGrid()
 {
 	SetColor(g_White);
-	for (int index{ 0 }; index <= g_RowAmount; ++index)
-	{
-		utils::DrawLine(Point2f{ 0.f , g_GridSize + g_GridSize * index }, Point2f{ g_GameWindowWidth , g_GridSize + g_GridSize * index });
-	}
+	//for (int index{ 0 }; index <= g_RowAmount; ++index)
+	//{
+	//	utils::DrawLine(Point2f{ 0.f , g_GridSquareSize + g_GridSquareSize * index }, Point2f{ g_GameWindowWidth , g_GridSquareSize + g_GridSquareSize * index });
+	//}
 
-	for (int index{ 0 }; index < g_CollumnAmount; ++index)
-	{
-		utils::DrawLine(Point2f{ g_GridSize + g_GridSize * index , g_GridSize }, Point2f{ g_GridSize + g_GridSize * index , g_GridSize + g_GameWindowHeight });
-	}
+	//for (int index{ 0 }; index < g_CollumnAmount; ++index)
+	//{
+	//	utils::DrawLine(Point2f{ g_GridSquareSize + g_GridSquareSize * index , g_GridSquareSize }, Point2f{ g_GridSquareSize + g_GridSquareSize * index , g_GridSquareSize + g_GameWindowHeight });
+	//}
+	utils::DrawRect(g_GridPosition);
 }
 
 void CheckGridPositions()
@@ -151,7 +130,7 @@ void CheckGridPositions()
 	std::cout << "Grid positions\n";
 	for (int index{ 0 }; index < g_GridAmount; ++index)
 	{
-		std::cout << "Square " << index << " position: {" << g_Intersections[index].x << ", " << g_Intersections[index].y << "}\n";
+		std::cout << "Square " << index << " position: {" << g_arrIntersections[index].x << ", " << g_arrIntersections[index].y << "}\n";
 	}
 }
 
@@ -159,51 +138,49 @@ void DrawItems(Rectf itemPos, Texture texture) {
 	DrawTexture(texture, itemPos);
 }
 
-void SelectAndPlace(Rectf& itemPrm) {
-	if (g_MouseX > itemPrm.left && g_MouseX < itemPrm.left + itemPrm.width && g_MouseY > itemPrm.top && g_MouseY < itemPrm.top + itemPrm.height) {
-		float middleOfItemX{ itemPrm.left + (itemPrm.width / 2) };
-		float middleOfItemY{ itemPrm.top + (itemPrm.height / 2) };
-		SetColor(g_Green);
-		DrawRect(itemPrm, 2.f);
-		g_MouseOnItem = true;
-	}
-	else if (g_LeftClickToggled == false) {
-		g_MouseOnItem = false;
-	}
-	if (g_MouseX > g_CollumnAmount * g_GridSize) {
-		g_MouseInGrid = true;
-	}
+void ClickConsumableToGrid(Rectf& consumable)
+{
+	int positionToArrayConversion{ static_cast<int>((g_MousePosition.x - g_GridPosition.left) / g_GridSquareSize)
+		+ static_cast<int>((g_MousePosition.y - g_GridPosition.top) / g_GridSquareSize) * g_CollumnAmount };
 
-	std::cout << g_MouseX << ' ' << g_MouseY << '\n';
-	if (g_MouseOnItem == true && g_LeftClickToggled == true && g_MouseInGrid == true) {
-		itemPrm.left = g_MouseX - (itemPrm.width / 2);
-		itemPrm.top = g_MouseY - (itemPrm.height / 2);
+	consumable.left = g_arrIntersections[positionToArrayConversion].x;
+	consumable.top = g_arrIntersections[positionToArrayConversion].y;
+}
+
+void SelectAndMove(const Point2f& consumableLocation, float& xCoordinateDifference, float& yCoordinateDifference)
+{
+	g_TemporaryConsumableLocation = consumableLocation;
+	if (g_MousePosition.x >= consumableLocation.x && g_MousePosition.x <= consumableLocation.x + g_GridSquareSize &&
+		g_MousePosition.y >= consumableLocation.y && g_MousePosition.y <= consumableLocation.y + g_GridSquareSize)
+	{
+		xCoordinateDifference = g_MousePosition.x - consumableLocation.x;
+		yCoordinateDifference = g_MousePosition.y - consumableLocation.y;
+		g_MoveConsumable = true;
 	}
 }
 
-void ShowClickedSquare() // make it to a changeable variable
+void ConsumableInteraction(Rectf& consumable)
 {
-	Rectf clickedSquare
+	if(g_MousePosition.x > (g_GridPosition.left + g_GridPosition.width))
 	{
-		0.f, 0.f, g_GridSize, g_GridSize
-	};
-
-	for (int index{ 0 }; index < g_CollumnAmount; ++index)
-	{
-		if (g_Intersections[index].x <= g_MouseX && (g_Intersections[index].x + g_GridSize) >= g_MouseX)
-		{
-			g_Item1.left = g_Intersections[index].x;
-		}
+		consumable.left = g_MousePosition.x - g_X;
+		consumable.top = g_MousePosition.y - g_Y;
 	}
-
-	for (int index{ 0 }; index < g_RowAmount; ++index)
+	else if(g_MousePosition.x <= (g_GridPosition.left + g_GridPosition.width))
 	{
-		if ((g_Intersections[index * g_CollumnAmount].y) <= g_MouseY && (g_Intersections[index * g_CollumnAmount].y + g_GridSize) >= g_MouseY)
-		{
-			g_Item1.top = g_Intersections[index * g_CollumnAmount].y;
-		}
+		ClickConsumableToGrid(g_arrConsumables[0]);
 	}
+}
 
-	//utils::FillRect(clickedSquare);
+void PlaceConsumable(Rectf& consumable)
+{
+	if (g_MousePosition.x > (g_GridPosition.left + g_GridPosition.width) || g_MousePosition.y < g_GridPosition.top ||
+		g_MousePosition.y > (g_GridPosition.top + g_GridPosition.height))
+	{
+		consumable.left = g_TemporaryConsumableLocation.x;
+		consumable.top = g_TemporaryConsumableLocation.y;
+	}
+	else
+		return;
 }
 #pragma endregion ownDefinitions
