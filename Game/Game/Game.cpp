@@ -24,7 +24,14 @@ void Update(float elapsedSec)
 {
 	if (g_MoveConsumable)
 	{
-		ConsumableInteraction(g_arrConsumables[0]);
+		if (g_MousePosition.x > (g_GridPosition.left + g_GridPosition.width))
+		{
+			SelectConsumableForDrag(g_arrConsumables[g_SelectedConsumableIndex]);
+		}
+		else if (g_MousePosition.x <= (g_GridPosition.left + g_GridPosition.width))
+		{
+			ClickConsumableToGrid(g_arrConsumables[g_SelectedConsumableIndex]);
+		}
 	}
 }
 
@@ -66,13 +73,12 @@ void OnMouseMotionEvent(const SDL_MouseMotionEvent& e)
 
 void OnMouseDownEvent(const SDL_MouseButtonEvent& e)
 {
-	SelectAndMove(Point2f{ g_arrConsumables[0].left, g_arrConsumables[0].top }, g_X, g_Y);
+	MouseInput();
 }
 
 void OnMouseUpEvent(const SDL_MouseButtonEvent& e)
 {
-	PlaceConsumable(g_arrConsumables[0]);
-	g_MoveConsumable = false;
+	PlaceConsumable(g_arrConsumables[g_SelectedConsumableIndex]);
 }
 #pragma endregion inputHandling
 
@@ -147,33 +153,20 @@ void ClickConsumableToGrid(Rectf& consumable)
 	consumable.top = g_arrIntersections[positionToArrayConversion].y;
 }
 
-void SelectAndMove(const Point2f& consumableLocation, float& xCoordinateDifference, float& yCoordinateDifference)
+void SelectConsumableForDrag(Rectf& consumable)
 {
-	g_TemporaryConsumableLocation = consumableLocation;
-	if (g_MousePosition.x >= consumableLocation.x && g_MousePosition.x <= consumableLocation.x + g_GridSquareSize &&
-		g_MousePosition.y >= consumableLocation.y && g_MousePosition.y <= consumableLocation.y + g_GridSquareSize)
-	{
-		xCoordinateDifference = g_MousePosition.x - consumableLocation.x;
-		yCoordinateDifference = g_MousePosition.y - consumableLocation.y;
-		g_MoveConsumable = true;
-	}
+	consumable.left = g_MousePosition.x - consumable.width * 0.5f;
+	consumable.top = g_MousePosition.y - consumable.height * 0.5f;
 }
 
-void ConsumableInteraction(Rectf& consumable)
+int FindConsumable()
 {
-	if(g_MousePosition.x > (g_GridPosition.left + g_GridPosition.width))
-	{
-		consumable.left = g_MousePosition.x - g_X;
-		consumable.top = g_MousePosition.y - g_Y;
-	}
-	else if(g_MousePosition.x <= (g_GridPosition.left + g_GridPosition.width))
-	{
-		ClickConsumableToGrid(g_arrConsumables[0]);
-	}
+	return static_cast<int>(g_MousePosition.y - g_arrConsumables[0].top) / static_cast<int>(g_GridSquareSize);
 }
 
 void PlaceConsumable(Rectf& consumable)
 {
+	g_MoveConsumable = false;
 	if (g_MousePosition.x > (g_GridPosition.left + g_GridPosition.width) || g_MousePosition.y < g_GridPosition.top ||
 		g_MousePosition.y > (g_GridPosition.top + g_GridPosition.height))
 	{
@@ -182,5 +175,24 @@ void PlaceConsumable(Rectf& consumable)
 	}
 	else
 		return;
+}
+
+void MouseInput()
+{
+	//if (g_MousePosition.y < g_GridPosition.top || g_MousePosition.y >(g_GridPosition.top + g_GridPosition.height))
+	//{
+	//	return;
+	//}
+	//if (g_MousePosition.x > g_GridPosition.left + g_GridPosition.width // if we have 3 collumns of consumables
+	if (g_MousePosition.x >= g_arrConsumables[0].left
+		&& g_MousePosition.x <= (g_arrConsumables[0].left + g_arrConsumables[0].width))
+	{
+		g_SelectedConsumableIndex = FindConsumable();
+		g_MoveConsumable = true;
+	}
+	else
+	{
+		return;
+	}
 }
 #pragma endregion ownDefinitions

@@ -23,11 +23,15 @@ g_White{
 	0.f, 1.f, 0.f, 1.f
 };
 
+int 
+g_SelectedConsumableIndex{ 0 };
+
 float 
 g_X{ 0.f },
 g_Y{ 0.f };
 
-Texture g_Obama;
+Texture 
+g_Obama;
 
 const int 
 g_CollumnAmount{13},
@@ -72,11 +76,12 @@ void CheckGridPositions();
 void DrawGrid();
 void DrawItems(Rectf itemPos, Texture texture);
 void DeleteTextures();
-void SelectAndMove(const Point2f& consumableLocation, float& xCoordinateDifference, float& yCoordinateDifference);
+void SelectConsumableForDrag(Rectf& consumable);
 void ClickConsumableToGrid(Rectf& consumable);
 void InitializeConsumablePositions();
-void ConsumableInteraction(Rectf& consumable);
+int FindConsumable();
 void PlaceConsumable(Rectf& consumable);
+void MouseInput();
 
 #pragma endregion ownDeclarations
 
