@@ -30,14 +30,20 @@ float
 g_X{ 0.f },
 g_Y{ 0.f };
 
-Texture 
-g_Obama;
+Texture
+g_Obama,
+g_Castle,
+g_Bomb,
+g_Turret,
+g_Tank,
+g_Soldier;
 
 const int 
 g_CollumnAmount{13},
 g_RowAmount{7},
-g_ConsumableAmount{1},
+g_ConsumableAmount{6},
 g_GridAmount{ g_CollumnAmount * g_RowAmount };
+Texture g_ConsumablesTextures[g_ConsumableAmount]{};
 
 const float 
 g_GameWindowWidth{ g_WindowWidth / 16.f * 13.f },
@@ -74,7 +80,7 @@ void InitializeTextures();
 void InitializeGridPositions();
 void CheckGridPositions();
 void DrawGrid();
-void DrawItems(Rectf itemPos, Texture texture);
+void DrawItems(Rectf itemPos[], Texture texture[]);
 void DeleteTextures();
 void SelectConsumableForDrag(Rectf& consumable);
 void ClickConsumableToGrid(Rectf& consumable);

@@ -17,7 +17,7 @@ void Draw()
 	ClearBackground();
 
 	DrawGrid();
-	DrawItems(g_arrConsumables[0], g_Obama);
+	DrawItems(g_arrConsumables, g_ConsumablesTextures);
 }
 
 void Update(float elapsedSec)
@@ -89,10 +89,34 @@ void InitializeTextures() {
 	if (!TextureFromFile("Resources/Obama.jpg", g_Obama)) {
 		std::cout << "Obama didnt load '\n";
 	}
+	if (!TextureFromFile("Resources/Crown.png", g_Castle)) {
+		std::cout << "g_Castle didnt load '\n";
+	}
+	if (!TextureFromFile("Resources/Bombaclat.png", g_Bomb)) {
+		std::cout << "g_Bomb didnt load '\n";
+	}
+	if (!TextureFromFile("Resources/Turret.png", g_Turret)) {
+		std::cout << "g_Turret didnt load '\n";
+	}
+	if (!TextureFromFile("Resources/Soldier.png", g_Soldier)) {
+		std::cout << "g_Soldier didnt load '\n";
+	}
+	if (!TextureFromFile("Resources/Tank.png", g_Tank)) {
+		std::cout << "g_Tank didnt load '\n";
+	}
+	Texture tempTxtArr[g_ConsumableAmount]{ g_Obama , g_Castle , g_Bomb , g_Turret , g_Soldier , g_Tank };
+	for (int i{ 0 }; i < g_ConsumableAmount; i++) {
+		g_ConsumablesTextures[i] = tempTxtArr[i];
+	}
 }
 
 void DeleteTextures() {
 	DeleteTexture(g_Obama);
+	DeleteTexture(g_Castle);
+	DeleteTexture(g_Bomb);
+	DeleteTexture(g_Turret);
+	DeleteTexture(g_Soldier);
+	DeleteTexture(g_Tank);
 }
 
 void InitializeGridPositions()
@@ -140,8 +164,10 @@ void CheckGridPositions()
 	}
 }
 
-void DrawItems(Rectf itemPos, Texture texture) {
-	DrawTexture(texture, itemPos);
+void DrawItems(Rectf itemPos[], Texture texture[]) {
+	for (int i{ 0 }; i < g_ConsumableAmount; i++) {
+		DrawTexture(texture[i], itemPos[i]);
+	}
 }
 
 void ClickConsumableToGrid(Rectf& consumable)
