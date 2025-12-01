@@ -7,26 +7,38 @@
 void Start()
 {
 	InitializeTextures();
+<<<<<<< Updated upstream
 	GenerateGridPositions();
 	//add comment
 	for (int index{ 0 }; index < g_GridAmount; ++index)
 	{
 		std::cout << "Coordinates at : {" << g_Intersections[index].x << ", " << g_Intersections[index].y << "}\n";
 	}
+=======
+	InitializeGridPositions();
+	InitializeConsumablePositions();
+	//CheckGridPositions();
+	
+>>>>>>> Stashed changes
 }
 
 void Draw()
 {
 	ClearBackground();
-
+	
 	DrawGrid();
+<<<<<<< Updated upstream
 	DrawItems(g_Item1, g_Obama);
 	SelectAndPlace(g_Item1);
 	ShowClickedSquare();
+=======
+	DrawItems(g_arrConsumables, g_ArrConsumableTextures);
+>>>>>>> Stashed changes
 }
 
 void Update(float elapsedSec)
 {
+<<<<<<< Updated upstream
 	// process input, do physics 
 
 	// e.g. Check keyboard state
@@ -39,6 +51,12 @@ void Update(float elapsedSec)
 	//{
 	//	std::cout << "Left and up arrow keys are down\n";
 	//}
+=======
+	if (g_MoveConsumable)
+	{
+		ConsumableInteraction(g_arrConsumables[FindConsumable()]);
+	}
+>>>>>>> Stashed changes
 }
 
 void End()
@@ -79,9 +97,13 @@ void OnMouseMotionEvent(const SDL_MouseMotionEvent& e)
 
 void OnMouseDownEvent(const SDL_MouseButtonEvent& e)
 {
+<<<<<<< Updated upstream
 	if (e.button == SDL_BUTTON_LEFT && g_MouseOnItem==true) {
 		g_LeftClickToggled = !g_LeftClickToggled;
 	}
+=======
+	SelectAndMove(Point2f{ g_arrConsumables[FindConsumable()].left, g_arrConsumables[FindConsumable()].top}, g_X, g_Y);
+>>>>>>> Stashed changes
 }
 
 void OnMouseUpEvent(const SDL_MouseButtonEvent& e)
@@ -114,10 +136,39 @@ void InitializeTextures() {
 	if (!TextureFromFile("Resources/Obama.jpg", g_Obama)) {
 		std::cout << "Obama didnt load '\n";
 	}
+	if (!TextureFromFile("Resources/Crown.png", g_Castle)) {
+		std::cout << "Castle didnt load '\n";
+	}
+	if (!TextureFromFile("Resources/Soldier.png", g_Soldier)) {
+		std::cout << "Castle didnt load '\n";
+	}
+	if (!TextureFromFile("Resources/Bombaclat.png", g_Bomb)) {
+		std::cout << "Castle didnt load '\n";
+	}
+	if (!TextureFromFile("Resources/Turret.png", g_Turret)) {
+		std::cout << "Castle didnt load '\n";
+	}
+	if (!TextureFromFile("Resources/Tank.png", g_Tank)) {
+		std::cout << "Castle didnt load '\n";
+	}
+	Texture tempArr[g_ConsumableAmount]{ g_Obama , g_Castle, g_Soldier, g_Bomb, g_Turret, g_Tank };
+	for (int i{ 0 }; i < g_ConsumableAmount; i++) {
+		g_ArrConsumableTextures[i] = tempArr[i];
+	}
 }
 
 void DeleteTextures() {
 	DeleteTexture(g_Obama);
+	DeleteTexture(g_Castle);
+	DeleteTexture(g_Soldier);
+	DeleteTexture(g_Bomb);
+	DeleteTexture(g_Turret);
+	DeleteTexture(g_Tank);
+}
+
+int FindConsumable()
+{
+	return static_cast<int>(g_MousePosition.y - g_arrConsumables[0].top) / static_cast<int>(g_GridSquareSize);
 }
 
 void GenerateGridPositions()
@@ -155,8 +206,12 @@ void CheckGridPositions()
 	}
 }
 
-void DrawItems(Rectf itemPos, Texture texture) {
-	DrawTexture(texture, itemPos);
+void DrawItems(Rectf itemPos[], Texture texture[]) {
+	
+
+	for (int i{ 0 }; i < g_ConsumableAmount; i++) {
+		DrawTexture(texture[i], itemPos[i]);
+	}
 }
 
 void SelectAndPlace(Rectf& itemPrm) {
@@ -185,8 +240,19 @@ void ShowClickedSquare() // make it to a changeable variable
 {
 	Rectf clickedSquare
 	{
+<<<<<<< Updated upstream
 		0.f, 0.f, g_GridSize, g_GridSize
 	};
+=======
+		consumable.left = g_MousePosition.x - g_X;
+		consumable.top = g_MousePosition.y - g_Y;
+	}
+	else if(g_MousePosition.x <= (g_GridPosition.left + g_GridPosition.width))
+	{
+		ClickConsumableToGrid(g_arrConsumables[FindConsumable()]);
+	}
+}
+>>>>>>> Stashed changes
 
 	for (int index{ 0 }; index < g_CollumnAmount; ++index)
 	{

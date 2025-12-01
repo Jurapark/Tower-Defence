@@ -26,9 +26,24 @@ float g_MouseX{};
 float g_MouseY{};
 
 Texture g_Obama;
+<<<<<<< Updated upstream
 const int g_CollumnAmount{13},
 g_RowAmount{7},
+=======
+Texture g_Castle;
+Texture g_Soldier;
+Texture g_Turret;
+Texture g_Bomb;
+Texture g_Tank;
+
+
+const int 
+g_CollumnAmount{13},
+g_RowAmount{7},
+g_ConsumableAmount{6},
+>>>>>>> Stashed changes
 g_GridAmount{ g_CollumnAmount * g_RowAmount };
+Texture g_ArrConsumableTextures[g_ConsumableAmount]{};
 
 const float g_GameWindowWidth{ g_WindowWidth / 16.f * 13.f },
 g_GameWindowHeight{ g_WindowHeight / 9.f * 7.f };
@@ -52,10 +67,19 @@ void InitializeTextures();
 void GenerateGridPositions();
 void CheckGridPositions();
 void DrawGrid();
-void DrawItems(Rectf itemPos, Texture texture);
+void DrawItems(Rectf itemPos[], Texture texture[]);
 void DeleteTextures();
+<<<<<<< Updated upstream
 void SelectAndPlace(Rectf & itemPrm);
 void ShowClickedSquare(); // goes in draw
+=======
+void SelectAndMove(const Point2f& consumableLocation, float& xCoordinateDifference, float& yCoordinateDifference);
+void ClickConsumableToGrid(Rectf& consumable);
+void InitializeConsumablePositions();
+void ConsumableInteraction(Rectf& consumable);
+void PlaceConsumable(Rectf& consumable);
+int FindConsumable();
+>>>>>>> Stashed changes
 
 #pragma endregion ownDeclarations
 
