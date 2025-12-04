@@ -4,7 +4,7 @@ using namespace utils;
 
 #pragma region gameInformation
 // TODO: Set your name and group in the title here
-std::string g_WindowTitle{ "Game - Name, firstname - 1DAExx" };
+std::string g_WindowTitle{ "Shitty Defence - Echoes of the Wind - 1DAE14-15" };
 
 // Change the window dimensions here
 float g_WindowWidth{ 1280 };
@@ -24,7 +24,7 @@ g_White{
 };
 
 int 
-g_SelectedConsumableIndex{ 0 };
+g_SelectedConsumableIndex{ -1 };
 
 float 
 g_X{ 0.f },
@@ -52,7 +52,7 @@ g_GridSquareSize{ 80.f };
 
 Point2f
 g_MousePosition{ 0.f, 0.f },
-g_TemporaryConsumableLocation{ 0.f, 0.f },
+g_InitialConsumableLocation{ 0.f, 0.f },
 g_arrIntersections[g_GridAmount]{ Point2f{0.f, 0.f} };
 
 Rectf
@@ -60,8 +60,8 @@ g_arrConsumables[g_ConsumableAmount]{
 	Rectf{
 		0.f,
 		0.f,
-		g_GridSquareSize,
-		g_GridSquareSize
+		0.f,
+		0.f
 	} 
 },
 g_GridPosition{
@@ -72,8 +72,7 @@ g_GridPosition{
 };
 
 bool
-g_LeftClickToggled{ false },
-g_MoveConsumable{ false };
+g_LeftClickToggled{ false };
 
 // Declare your own functions here
 void InitializeTextures();
@@ -82,12 +81,15 @@ void CheckGridPositions();
 void DrawGrid();
 void DrawItems(Rectf itemPos[], Texture texture[]);
 void DeleteTextures();
-void SelectConsumableForDrag(Rectf& consumable);
+void DragConsumable(Rectf& consumable);
 void ClickConsumableToGrid(Rectf& consumable);
 void InitializeConsumablePositions();
-int FindConsumable();
-void PlaceConsumable(Rectf& consumable);
+int GetGridIndexFromMousePosition();
+void PutConsumableBack(Rectf& consumable);
 void MouseInput();
+bool IsMouseOutOfBounds();
+bool IsMouseOutOfGrid();
+bool IsConsumableInSlot();
 
 #pragma endregion ownDeclarations
 
