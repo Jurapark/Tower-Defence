@@ -18,8 +18,8 @@ float g_WindowHeight{ 720 };
 
 struct Grid
 {
-	Point2f originLocation;
-	bool isTaken{ false };
+	Point2f originLocation{ Point2f{0.f, 0.f} };
+	int consumableIndex{ -1 };
 };
 
 Color4f 
@@ -61,22 +61,24 @@ g_MousePosition{ 0.f, 0.f },
 g_InitialConsumableLocation{ 0.f, 0.f };
 
 Grid
-g_arrIntersections[g_GridAmount]{ Point2f{0.f, 0.f} };
+g_arrIntersections[g_GridAmount];
 
-Rectf
-g_arrConsumables[g_ConsumableAmount]{ 
-	Rectf{
-		0.f,
-		0.f,
-		0.f,
-		0.f
-	} 
-},
+const Rectf
 g_GridPosition{
 	0.f,
 	g_GridSquareSize,
 	g_GridSquareSize * g_CollumnAmount,
 	g_GridSquareSize * g_RowAmount
+};
+
+Rectf
+g_arrConsumables[g_ConsumableAmount]{
+	Rectf{
+		0.f,
+		0.f,
+		0.f,
+		0.f
+	}
 };
 
 bool
@@ -92,12 +94,14 @@ void DeleteTextures();
 void DragConsumable(Rectf& consumable);
 void ClickConsumableToGrid(Rectf& consumable);
 void InitializeConsumablePositions();
-int GetGridIndexFromMousePosition();
+int FindConsumable();
 void PutConsumableBack(Rectf& consumable);
 void MouseInput();
 bool IsMouseOutOfBounds();
 bool IsMouseOutOfGrid();
 bool IsConsumableInSlot();
+void PlaceConsumable(Rectf& consumable);
+int GetGridIndex();
 
 #pragma endregion ownDeclarations
 
