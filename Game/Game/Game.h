@@ -16,6 +16,12 @@ float g_WindowHeight{ 720 };
 #pragma region ownDeclarations
 // Declare your own global variables here
 
+struct Grid
+{
+	Point2f originLocation;
+	bool isTaken{ false };
+};
+
 Color4f 
 g_White{
 	1.f, 1.f, 1.f, 1.f
@@ -52,7 +58,9 @@ g_GridSquareSize{ 80.f };
 
 Point2f
 g_MousePosition{ 0.f, 0.f },
-g_InitialConsumableLocation{ 0.f, 0.f },
+g_InitialConsumableLocation{ 0.f, 0.f };
+
+Grid
 g_arrIntersections[g_GridAmount]{ Point2f{0.f, 0.f} };
 
 Rectf
