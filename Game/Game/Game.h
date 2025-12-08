@@ -19,7 +19,7 @@ float g_WindowHeight{ 720 };
 struct Grid
 {
 	Point2f originLocation{ Point2f{0.f, 0.f} };
-	int consumableIndex{ -1 };
+	bool isTaken{ false };
 };
 
 Color4f 
@@ -91,17 +91,16 @@ void CheckGridPositions();
 void DrawGrid();
 void DrawItems(Rectf itemPos[], Texture texture[]);
 void DeleteTextures();
-void DragConsumable(Rectf& consumable);
+void MoveConsumable(Rectf& consumable);
 void ClickConsumableToGrid(Rectf& consumable);
 void InitializeConsumablePositions();
 int FindConsumable();
-void PutConsumableBack(Rectf& consumable);
-void MouseInput();
+void PutConsumableBack(const int index);
 bool IsMouseOutOfBounds();
 bool IsMouseOutOfGrid();
-bool IsConsumableInSlot();
-void PlaceConsumable(Rectf& consumable);
+void PlaceConsumableOnGrid(Rectf& consumable, Grid& intersection);
 int GetGridIndex();
+void SelectConsumable();
 
 #pragma endregion ownDeclarations
 

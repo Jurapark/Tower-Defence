@@ -24,16 +24,19 @@ void Update(float elapsedSec)
 {
 	if (g_SelectedConsumableIndex != -1 && IsMouseOutOfBounds() == false)
 	{
-		std::cout << g_SelectedConsumableIndex << "\n";
-		DragConsumable(g_arrConsumables[g_SelectedConsumableIndex]);
+		MoveConsumable(g_arrConsumables[g_SelectedConsumableIndex]);
 		ClickConsumableToGrid(g_arrConsumables[g_SelectedConsumableIndex]);
 	}
 	else if (g_SelectedConsumableIndex >= 0)
 	{
-		PutConsumableBack(g_arrConsumables[g_SelectedConsumableIndex]);
+		PutConsumableBack(g_SelectedConsumableIndex);
 	}
-	
-	
+
+	if (g_SelectedConsumableIndex < -1 || g_SelectedConsumableIndex > g_ConsumableAmount)
+	{
+		std::cout << "Something Broke\n";
+	}
+
 }
 
 void End()
@@ -74,12 +77,36 @@ void OnMouseMotionEvent(const SDL_MouseMotionEvent& e)
 
 void OnMouseDownEvent(const SDL_MouseButtonEvent& e)
 {
-	MouseInput();
+	if (IsMouseOutOfBounds() == true)
+	{
+		return;
+	}
+	else if (IsMouseOutOfGrid() == true)
+	{
+		SelectConsumable();
+	}
+	else if (IsMouseOutOfGrid() == false)
+	{
+		std::cout << g_arrIntersections[GetGridIndex()].isTaken << "\n";
+	}
 }
 
 void OnMouseUpEvent(const SDL_MouseButtonEvent& e)
 {
-	PlaceConsumable(g_arrConsumables[g_SelectedConsumableIndex]);
+	if (g_SelectedConsumableIndex != -1)
+	{
+		int gridIndex{ GetGridIndex() };
+		if (IsMouseOutOfBounds() == true || IsMouseOutOfGrid() == true || g_arrIntersections[gridIndex].isTaken)
+		{
+			PutConsumableBack(g_SelectedConsumableIndex);
+		}
+		else
+		{
+			PlaceConsumableOnGrid(g_arrConsumables[g_SelectedConsumableIndex], g_arrIntersections[gridIndex]);
+		}
+
+		g_SelectedConsumableIndex = -1;
+	}
 }
 #pragma endregion inputHandling
 
@@ -130,7 +157,7 @@ void InitializeGridPositions()
 		{
 			g_arrIntersections[row * g_CollumnAmount + collumn].originLocation.x = g_GridSquareSize * collumn;
 			g_arrIntersections[row * g_CollumnAmount + collumn].originLocation.y = g_GridSquareSize + g_GridSquareSize * row;
-			g_arrIntersections[row * g_CollumnAmount + collumn].consumableIndex = -1;
+			g_arrIntersections[row * g_CollumnAmount + collumn].isTaken = false;
 		}
 	}
 }
@@ -147,15 +174,6 @@ void InitializeConsumablePositions()
 void DrawGrid()
 {
 	SetColor(g_White);
-	//for (int index{ 0 }; index <= g_RowAmount; ++index)
-	//{
-	//	utils::DrawLine(Point2f{ 0.f , g_GridSquareSize + g_GridSquareSize * index }, Point2f{ g_GameWindowWidth , g_GridSquareSize + g_GridSquareSize * index });
-	//}
-
-	//for (int index{ 0 }; index < g_CollumnAmount; ++index)
-	//{
-	//	utils::DrawLine(Point2f{ g_GridSquareSize + g_GridSquareSize * index , g_GridSquareSize }, Point2f{ g_GridSquareSize + g_GridSquareSize * index , g_GridSquareSize + g_GameWindowHeight });
-	//}
 	utils::DrawRect(g_GridPosition);
 }
 
@@ -164,7 +182,7 @@ void CheckGridPositions()
 	std::cout << "Grid positions\n";
 	for (int index{ 0 }; index < g_GridAmount; ++index)
 	{
-		std::cout << "Square " << index << " index: " << g_arrIntersections[index].consumableIndex << "\n";
+		std::cout << "Square " << index << " index: " << g_arrIntersections[index].isTaken << "\n";
 	}
 }
 
@@ -174,79 +192,64 @@ void DrawItems(Rectf itemPos[], Texture texture[]) {
 	}
 }
 
-void MouseInput()
-{
-
-	if (IsMouseOutOfBounds() || FindConsumable() == -1)
-	{
-		return;
-	}
-	int gridIndex{ GetGridIndex() };
-	if (gridIndex != -1 && g_arrIntersections[gridIndex].consumableIndex > 0)
-	{
-		g_SelectedConsumableIndex = g_arrIntersections[gridIndex].consumableIndex;
-		return;
-	}
-
-	g_SelectedConsumableIndex = FindConsumable();
-	g_InitialConsumableLocation = Point2f{ g_GridPosition.left + g_GridPosition.width + g_GridSquareSize,
-		g_GridSquareSize + g_GridSquareSize * g_SelectedConsumableIndex };
-
-}
-
 void ClickConsumableToGrid(Rectf& consumable)
 {
 	if (g_MousePosition.x < (g_GridPosition.left + g_GridPosition.width))
 	{
-		int positionToArrayConversion{ static_cast<int>((g_MousePosition.x - g_GridPosition.left) / g_GridSquareSize)
-			+ static_cast<int>((g_MousePosition.y - g_GridPosition.top) / g_GridSquareSize) * g_CollumnAmount };
+		int gridIndex{ GetGridIndex() };
 
-		consumable.left = g_arrIntersections[positionToArrayConversion].originLocation.x;
-		consumable.top = g_arrIntersections[positionToArrayConversion].originLocation.y;
+		consumable.left = g_arrIntersections[gridIndex].originLocation.x;
+		consumable.top = g_arrIntersections[gridIndex].originLocation.y;
 	}
 }
 
-void DragConsumable(Rectf& consumable)
+void MoveConsumable(Rectf& consumable)
 {
-	std::cout << consumable.left << " " << consumable.top;
 	consumable.left = g_MousePosition.x - consumable.width * 0.5f;
 	consumable.top = g_MousePosition.y - consumable.height * 0.5f;
 }
 
-void PutConsumableBack(Rectf& consumable) // problem here
+void PutConsumableBack(const int index)
 {
-	if (IsMouseOutOfGrid() == true && g_SelectedConsumableIndex != -1)
-	{
-		g_arrConsumables[g_SelectedConsumableIndex].left = g_InitialConsumableLocation.x;
-		g_arrConsumables[g_SelectedConsumableIndex].top = g_InitialConsumableLocation.y;
-		g_SelectedConsumableIndex = -1;
-	}
+	g_arrConsumables[index].left = g_InitialConsumableLocation.x;
+	g_arrConsumables[index].top = g_InitialConsumableLocation.y;
 }
 
 bool IsMouseOutOfBounds()
 {
-	return
-		g_MousePosition.y <= g_GridPosition.top ||
-		g_MousePosition.y >= (g_GridPosition.top + g_GridPosition.height);
+	if (g_MousePosition.y <= g_GridPosition.top ||
+		g_MousePosition.y >= (g_GridPosition.top + g_GridPosition.height))
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }
 
 bool IsMouseOutOfGrid()
 {
-	return g_MousePosition.x > (g_GridPosition.left + g_GridPosition.width);
-}
-
-bool IsConsumableInSlot()
-{
-	return false;
+	if (g_MousePosition.x > (g_GridPosition.left + g_GridPosition.width))
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }
 
 int FindConsumable()
 {
-	if (g_MousePosition.x < (g_GridPosition.left + g_GridSquareSize * 14) || g_MousePosition.x >(g_GridPosition.left + g_GridSquareSize * 15))
+	if (g_MousePosition.y < (g_GridSquareSize + g_ConsumableAmount * g_GridSquareSize))
+	{
+		return static_cast<int>(g_MousePosition.y - g_GridSquareSize) / static_cast<int>(g_GridSquareSize);
+	}
+	else
 	{
 		return -1;
 	}
-	return static_cast<int>(g_MousePosition.y - g_GridSquareSize) / static_cast<int>(g_GridSquareSize);
 }
 
 int GetGridIndex()
@@ -255,24 +258,25 @@ int GetGridIndex()
 	{
 		return -1;
 	}
-	int collumn{ static_cast<int>(g_MousePosition.y) / static_cast<int>(g_GridSquareSize) };
-	int row{ static_cast<int>(g_MousePosition.x) / static_cast<int>(g_GridSquareSize) };
+	int collumn{ static_cast<int>(g_MousePosition.x) / static_cast<int>(g_GridSquareSize) };
+	int row{ static_cast<int>(g_MousePosition.y - g_GridSquareSize) / static_cast<int>(g_GridSquareSize) };
 
-	return collumn + row * g_RowAmount;
+	return collumn + row * g_CollumnAmount;
 }
 
-void PlaceConsumable(Rectf& consumable)
+void PlaceConsumableOnGrid(Rectf& consumable, Grid& intersection)
 {
-	int gridIndex = GetGridIndex();
-	if (g_arrIntersections[gridIndex].consumableIndex != -1 || gridIndex == -1)
-	{
-		PutConsumableBack(g_arrConsumables[g_SelectedConsumableIndex]);
-		g_SelectedConsumableIndex = -1;
-		return;
-	}
-	g_arrConsumables[g_SelectedConsumableIndex].left = g_arrIntersections[gridIndex].originLocation.x;
-	g_arrConsumables[g_SelectedConsumableIndex].top = g_arrIntersections[gridIndex].originLocation.y;
-	g_arrIntersections[gridIndex].consumableIndex = g_SelectedConsumableIndex;
+	consumable.left = intersection.originLocation.x;
+	consumable.top = intersection.originLocation.y;
+	intersection.isTaken = true;
+}
+
+void SelectConsumable()
+{
+	g_SelectedConsumableIndex = FindConsumable();
+	g_InitialConsumableLocation = Point2f{
+		g_arrConsumables[g_SelectedConsumableIndex].left,
+		g_arrConsumables[g_SelectedConsumableIndex].top };
 }
 
 #pragma endregion ownDefinitions
