@@ -22,7 +22,7 @@ struct Grid
 	bool isTaken{ false };
 };
 
-Color4f 
+const Color4f 
 g_White{
 	1.f, 1.f, 1.f, 1.f
 }, g_Green{
@@ -31,10 +31,6 @@ g_White{
 
 int 
 g_SelectedConsumableIndex{ -1 };
-
-float 
-g_X{ 0.f },
-g_Y{ 0.f };
 
 Texture
 g_Obama,
@@ -80,9 +76,6 @@ g_arrConsumables[g_ConsumableAmount]{
 		0.f
 	}
 };
-
-bool
-g_LeftClickToggled{ false };
 
 // Declare your own functions here
 void InitializeTextures();
