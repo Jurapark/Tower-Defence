@@ -264,7 +264,7 @@ int GetGridIndex()
 void PlaceConsumable(Rectf& consumable)
 {
 	int gridIndex = GetGridIndex();
-	if (g_arrIntersections[gridIndex].consumableIndex == -1 || gridIndex == -1)
+	if (g_arrIntersections[gridIndex].consumableIndex != -1 || gridIndex == -1)
 	{
 		PutConsumableBack(g_arrConsumables[g_SelectedConsumableIndex]);
 		g_SelectedConsumableIndex = -1;
