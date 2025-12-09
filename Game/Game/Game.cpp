@@ -106,7 +106,7 @@ void OnMouseDownEvent(const SDL_MouseButtonEvent& e)
 	}
 	else if (IsMouseOutOfGrid() == false)
 	{
-		std::cout << g_arrIntersections[GetGridIndex()].isTaken << "\n";
+		std::cout << g_arrIntersections[GetGridIndex(g_MousePosition)].isTaken << "\n";
 	}
 }
 
@@ -114,7 +114,7 @@ void OnMouseUpEvent(const SDL_MouseButtonEvent& e)
 {
 	if (g_SelectedConsumableIndex != -1)
 	{
-		int gridIndex{ GetGridIndex() };
+		int gridIndex{ GetGridIndex(g_MousePosition) };
 		if (IsMouseOutOfBounds() == true || IsMouseOutOfGrid() == true || g_arrIntersections[gridIndex].isTaken)
 		{
 			PutConsumableBack(g_SelectedConsumableIndex);
@@ -236,7 +236,7 @@ void ClickConsumableToGrid(Rectf& consumable)
 {
 	if (g_MousePosition.x < (g_GridPosition.left + g_GridPosition.width))
 	{
-		int gridIndex{ GetGridIndex() };
+		int gridIndex{ GetGridIndex(g_MousePosition) };
 
 		consumable.left = g_arrIntersections[gridIndex].originLocation.x;
 		consumable.top = g_arrIntersections[gridIndex].originLocation.y;
@@ -292,14 +292,26 @@ int FindConsumable()
 	}
 }
 
-int GetGridIndex()
+int GetGridIndex(const Point2f& location)
 {
 	if (IsMouseOutOfGrid() == true)
 	{
 		return -1;
 	}
-	int collumn{ static_cast<int>(g_MousePosition.x) / static_cast<int>(g_GridSquareSize) };
-	int row{ static_cast<int>(g_MousePosition.y - g_GridSquareSize) / static_cast<int>(g_GridSquareSize) };
+	int collumn{ static_cast<int>(location.x) / static_cast<int>(g_GridSquareSize) };
+	int row{ static_cast<int>(location.y - g_GridSquareSize) / static_cast<int>(g_GridSquareSize) };
+
+	return collumn + row * g_CollumnAmount;
+}
+
+int GetGridIndex(const float left, const float top)
+{
+	if (IsMouseOutOfGrid() == true)
+	{
+		return -1;
+	}
+	int collumn{ static_cast<int>(left) / static_cast<int>(g_GridSquareSize) };
+	int row{ static_cast<int>(top - g_GridSquareSize) / static_cast<int>(g_GridSquareSize) };
 
 	return collumn + row * g_CollumnAmount;
 }
@@ -392,6 +404,7 @@ void DrawRoadAndGrass(Rectf coord) {
 	for (int i{ 0 }; i < g_GridAmount; i++) {
 		if (loops < loopAmm2) {
 			DrawTexture(g_Road, curCord2);
+			g_arrIntersections[GetGridIndex(curCord2.left, curCord2.top)].isTaken = true;
 		}
 		if (goDown == true) {
 			curCord2.top += g_GridSquareSize;
@@ -413,6 +426,7 @@ void DrawRoadAndGrass(Rectf coord) {
 			loops++;
 			if (loops == loopAmm2) {
 				DrawTexture(g_Road, curCord2);
+				g_arrIntersections[GetGridIndex(Point2f{ curCord2.left, curCord2.top })].isTaken = true;
 			}
 		}
 		else if (curCord2.top == coord.height && goDown == true) {
