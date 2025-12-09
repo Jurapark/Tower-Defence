@@ -84,7 +84,7 @@ struct EnemyInfo {
 struct Grid
 {
 	Point2f originLocation{ Point2f{0.f, 0.f} };
-	int consumableIndex{ -1 };
+	bool isTaken{ false };
 };
 
 Color4f 
@@ -146,16 +146,11 @@ void CheckGridPositions();
 void DrawGrid();
 void DrawItems(Rectf itemPos[], Texture texture[]);
 void DeleteTextures();
-void DragConsumable(Rectf& consumable);
 void ClickConsumableToGrid(Rectf& consumable);
 void InitializeConsumablePositions();
 int FindConsumable();
-void PutConsumableBack(Rectf& consumable);
-void MouseInput();
 bool IsMouseOutOfBounds();
 bool IsMouseOutOfGrid();
-bool IsConsumableInSlot();
-void PlaceConsumable(Rectf& consumable);
 int GetGridIndex();
 void DrawRoadAndGrass(Rectf coord);
 void AddPathPoint(float x, float y);
@@ -164,6 +159,11 @@ void EnemyCapacity();
 void SpawnEnemy();
 void EnemyMovement(float elapsedSec);
 void DrawEnemies();
+void MoveConsumable(Rectf& consumable);
+void PutConsumableBack(const int index);
+void PlaceConsumableOnGrid(Rectf& consumable, Grid& intersection);
+void SelectConsumable();
+
 
 #pragma endregion ownDeclarations
 
