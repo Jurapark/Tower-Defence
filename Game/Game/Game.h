@@ -16,6 +16,12 @@ float g_WindowHeight{ 720 };
 #pragma region ownDeclarations
 // Declare your own global variables here
 
+struct ConsumableInfo {
+	Rectf position;
+	float shotCooldown;
+	float radius;
+};
+
 float g_TimeFlow{0};
 
 enum class EnemyMovements {
@@ -29,9 +35,10 @@ EnemyMovements g_EnemyClass{ EnemyMovements::right };
 float g_MoveCooldown{ 1.f };
 
 const int
+g_PathTileAmount{ 36 },
 g_CollumnAmount{ 13 },
 g_RowAmount{ 7 },
-g_ConsumableAmount{ 6 },
+g_ConsumableAmount{ 5 },
 g_GridAmount{ g_CollumnAmount * g_RowAmount };
 
 const float
@@ -97,11 +104,6 @@ g_White{
 int 
 g_SelectedConsumableIndex{ -1 };
 
-float 
-g_X{ 0.f },
-g_Y{ 0.f };
-
-
 int g_SpirPathSize{ 0 };
 int g_SpirPathCapacity{ 0 };
 Point2f* g_SpirPath{ nullptr };
@@ -120,8 +122,6 @@ g_InitialConsumableLocation{ 0.f, 0.f };
 Grid
 g_arrIntersections[g_GridAmount];
 
-
-
 Rectf
 g_arrConsumables[g_ConsumableAmount]{
 	Rectf{
@@ -131,9 +131,6 @@ g_arrConsumables[g_ConsumableAmount]{
 		0.f
 	}
 };
-
-bool
-g_LeftClickToggled{ false };
 
 float g_EnemySpawnTime{ 0.f };
 float g_Tst{ 0 };
@@ -164,6 +161,7 @@ void MoveConsumable(Rectf& consumable);
 void PutConsumableBack(const int index);
 void PlaceConsumableOnGrid(Rectf& consumable, Grid& intersection);
 void SelectConsumable();
+void AddPathTilesToIntersections(Point2f* arrPathTiles, const int pathTileAmount);
 
 
 #pragma endregion ownDeclarations

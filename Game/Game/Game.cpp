@@ -11,11 +11,12 @@ void Start()
 	
 	InitializeTextures();
 	InitializeGridPositions();
-	InitializeConsumablePositions();
-	CheckGridPositions();
 	g_SpirPathCapacity = 11;
 	g_SpirPath = new Point2f[g_SpirPathCapacity]{};
 	CreateSpiralPath(g_GridPosition);
+	InitializeConsumablePositions();
+	AddPathTilesToIntersections(g_SpirPath, g_SpirPathSize);
+	CheckGridPositions();
 }
 
 void Draw()
@@ -53,8 +54,6 @@ void Update(float elapsedSec)
 	}
 	EnemyMovement(elapsedSec);
 
-	
-	
 }
 
 void End()
@@ -160,7 +159,7 @@ void InitializeTextures() {
 	if (!TextureFromFile("Resources/Enemy.png", g_Enemy)) {
 		std::cout << "g_Tank didnt load '\n";
 	}
-	Texture tempTxtArr[g_ConsumableAmount]{ g_Obama , g_Castle , g_Bomb , g_Turret , g_Soldier , g_Tank };
+	Texture tempTxtArr[g_ConsumableAmount]{ g_Obama , g_Bomb , g_Turret , g_Soldier , g_Tank };
 	for (int index{ 0 }; index < g_ConsumableAmount; index++) {
 		g_ConsumablesTextures[index] = tempTxtArr[index];
 		g_arrConsumables[index].width = g_GridSquareSize;
@@ -230,6 +229,7 @@ void DrawItems(Rectf itemPos[], Texture texture[]) {
 	for (int i{ 0 }; i < g_ConsumableAmount; i++) {
 		DrawTexture(texture[i], itemPos[i]);
 	}
+	DrawTexture(g_Castle, g_arrIntersections[48].originLocation);
 }
 
 void ClickConsumableToGrid(Rectf& consumable)
@@ -426,7 +426,7 @@ void DrawRoadAndGrass(Rectf coord) {
 			loops++;
 			if (loops == loopAmm2) {
 				DrawTexture(g_Road, curCord2);
-				g_arrIntersections[GetGridIndex(Point2f{ curCord2.left, curCord2.top })].isTaken = true;
+				g_arrIntersections[GetGridIndex(curCord2.left, curCord2.top)].isTaken = true;
 			}
 		}
 		else if (curCord2.top == coord.height && goDown == true) {
@@ -449,6 +449,7 @@ void DrawRoadAndGrass(Rectf coord) {
 		}
 	}
 }
+
 void AddPathPoint(float x, float y) {
 	if (g_SpirPathSize == g_SpirPathCapacity) {
 		g_SpirPathCapacity = g_SpirPathCapacity * 2;
@@ -463,6 +464,7 @@ void AddPathPoint(float x, float y) {
 	g_SpirPath[g_SpirPathSize].y = y;
 	g_SpirPathSize++;
 }
+
 void CreateSpiralPath(Rectf bounds) {
 	float left{ bounds.left };
 	float top{ 2*bounds.top };
@@ -514,10 +516,9 @@ void CreateSpiralPath(Rectf bounds) {
 			AddPathPoint(i, top);
 
 		}
-
-		
 	}
 }
+
 void EnemyCapacity() {
 	if (g_EnemiesCount >= g_EnemiesCap) {
 		int oldEnemiesCap{ g_EnemiesCap };
@@ -535,6 +536,7 @@ void EnemyCapacity() {
 		g_Enemies = newArr;
 	}
 }
+
 void SpawnEnemy() {
 	EnemyCapacity();
 	g_Enemies[g_EnemiesCount].pathPosition = 0;
@@ -543,6 +545,7 @@ void SpawnEnemy() {
 	g_Enemies[g_EnemiesCount].movingCooldown = 0.f;
 	g_EnemiesCount++;
 }
+
 void EnemyMovement(float elapsedSec) {
 	for (int i{ 0 }; i < g_EnemiesCount; i++) {
 		g_Enemies[i].movingCooldown -= 1 * elapsedSec;
@@ -554,6 +557,7 @@ void EnemyMovement(float elapsedSec) {
 		}
 	}
 }
+
 void DrawEnemies() {
 	for (int i{ 0 }; i < g_EnemiesCount; i++) {
 		g_Enemies[i].texture = g_Enemy;
@@ -562,4 +566,13 @@ void DrawEnemies() {
 		DrawTexture(g_Enemies[i].texture, g_Enemies[i].parameters);
 	}
 }
+
+void AddPathTilesToIntersections(Point2f* arrPathTiles, const int pathTileAmount)
+{
+	for (int index{ 0 }; index < pathTileAmount; ++index)
+	{
+		g_arrIntersections[GetGridIndex(arrPathTiles[index].x, arrPathTiles[index].y)].isTaken = true;
+	}
+}
+
 #pragma endregion ownDefinitions
