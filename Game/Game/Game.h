@@ -24,27 +24,32 @@ struct ConsumableInfo {
 
 float g_TimeFlow{0};
 
-enum class EnemyMovements {
-	right,
-	down,
-	left,
-	up
+enum class TextureNames {
+	Obama,
+	Bomb,
+	Turret,
+	Soldier,
+	Tank
 };
-EnemyMovements g_EnemyClass{ EnemyMovements::right };
 
-float g_MoveCooldown{ 1.f };
+
+float g_MoveCooldown{ 0.5f };
 
 const int
 g_PathTileAmount{ 36 },
 g_CollumnAmount{ 13 },
 g_RowAmount{ 7 },
 g_ConsumableAmount{ 5 },
-g_GridAmount{ g_CollumnAmount * g_RowAmount };
+g_GridAmount{ g_CollumnAmount * g_RowAmount },
+g_MaxHealthAmount{ 20 };
 
 const float
 g_GameWindowWidth{ g_WindowWidth / 16.f * 13.f },
 g_GameWindowHeight{ g_WindowHeight / 9.f * 7.f },
 g_GridSquareSize{ 80.f };
+
+bool
+g_IsGameLost{ false };
 
 Texture
 g_Obama,
@@ -94,20 +99,44 @@ struct Grid
 	bool isTaken{ false };
 };
 
-Color4f 
+const Color4f 
 g_White{
 	1.f, 1.f, 1.f, 1.f
 }, g_Green{
 	0.f, 1.f, 0.f, 1.f
+},
+g_Black{
+	0.f,
+	0.f,
+	0.f,
+	1.f
+},
+g_Red{
+	1.f,
+	0.f,
+	0.f,
+	1.f
+},
+g_Yellow{
+	1.f,
+	1.f,
+	0.f,
+	1.f
+},
+g_Orange{
+	1.f,
+	0.647f,
+	0.f,
+	1.f
 };
 
 int 
-g_SelectedConsumableIndex{ -1 };
+g_SelectedConsumableIndex{ -1 },
+g_HealthAmount{ 20 };
 
 int g_SpirPathSize{ 0 };
 int g_SpirPathCapacity{ 0 };
 Point2f* g_SpirPath{ nullptr };
-
 
 Texture g_ConsumablesTextures[g_ConsumableAmount]{};
 int g_EnemyAmmount{ 0 };
@@ -122,7 +151,7 @@ g_InitialConsumableLocation{ 0.f, 0.f };
 Grid
 g_arrIntersections[g_GridAmount];
 
-Rectf
+ConsumableInfo
 g_arrConsumables[g_ConsumableAmount]{
 	Rectf{
 		0.f,
@@ -141,7 +170,7 @@ void InitializeTextures();
 void InitializeGridPositions();
 void CheckGridPositions();
 void DrawGrid();
-void DrawItems(Rectf itemPos[], Texture texture[]);
+void DrawItems(ConsumableInfo itemPos[], Texture texture[]);
 void DeleteTextures();
 void ClickConsumableToGrid(Rectf& consumable);
 void InitializeConsumablePositions();
@@ -162,6 +191,12 @@ void PutConsumableBack(const int index);
 void PlaceConsumableOnGrid(Rectf& consumable, Grid& intersection);
 void SelectConsumable();
 void AddPathTilesToIntersections(Point2f* arrPathTiles, const int pathTileAmount);
+void AddConsumableParameters(ConsumableInfo* arrConsumables);
+void DrawHealthBar(const int healthAmount, const int maxHealth);
+void TakeDamage(int& healthAmount, EnemyInfo* arrEnemies);
+void Shoot(EnemyInfo* arrEnemies, ConsumableInfo* arrTowers);
+bool IsEnemyInShootingRadius(const Rectf& enemyPosition, const Ellipsef& shootingRadius);
+
 
 
 #pragma endregion ownDeclarations

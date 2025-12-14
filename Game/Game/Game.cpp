@@ -8,7 +8,7 @@ void Start()
 {
 	g_EnemiesCount = 1;
 	g_Enemies = new EnemyInfo[g_EnemiesCount]{};
-	
+
 	InitializeTextures();
 	InitializeGridPositions();
 	g_SpirPathCapacity = 11;
@@ -17,21 +17,23 @@ void Start()
 	InitializeConsumablePositions();
 	AddPathTilesToIntersections(g_SpirPath, g_SpirPathSize);
 	CheckGridPositions();
+	AddConsumableParameters(g_arrConsumables);
 }
 
 void Draw()
 {
 	ClearBackground();
-	
+
 	DrawRoadAndGrass(g_GridPosition);
 	DrawItems(g_arrConsumables, g_ConsumablesTextures);
 	DrawEnemies();
 	DrawGrid();
+	DrawHealthBar(g_HealthAmount, g_MaxHealthAmount);
 }
 
 void Update(float elapsedSec)
 {
-	g_EnemySpawnTime +=  1 * elapsedSec;
+	g_EnemySpawnTime += 1 * elapsedSec;
 	g_TimeFlow += 1 * elapsedSec;
 	g_Tst += 1 * elapsedSec;
 	if (g_EnemySpawnTime >= 2.f) {
@@ -40,18 +42,14 @@ void Update(float elapsedSec)
 	}
 	if (g_SelectedConsumableIndex != -1 && IsMouseOutOfBounds() == false)
 	{
-		MoveConsumable(g_arrConsumables[g_SelectedConsumableIndex]);
-		ClickConsumableToGrid(g_arrConsumables[g_SelectedConsumableIndex]);
+		MoveConsumable(g_arrConsumables[g_SelectedConsumableIndex].position);
+		ClickConsumableToGrid(g_arrConsumables[g_SelectedConsumableIndex].position);
 	}
 	else if (g_SelectedConsumableIndex >= 0)
 	{
 		PutConsumableBack(g_SelectedConsumableIndex);
 	}
 
-	if (g_SelectedConsumableIndex < -1 || g_SelectedConsumableIndex > g_ConsumableAmount)
-	{
-		std::cout << "Something Broke\n";
-	}
 	EnemyMovement(elapsedSec);
 
 }
@@ -59,7 +57,7 @@ void Update(float elapsedSec)
 void End()
 {
 	DeleteTextures();
-	
+
 }
 #pragma endregion gameFunctions
 
@@ -120,7 +118,7 @@ void OnMouseUpEvent(const SDL_MouseButtonEvent& e)
 		}
 		else
 		{
-			PlaceConsumableOnGrid(g_arrConsumables[g_SelectedConsumableIndex], g_arrIntersections[gridIndex]);
+			PlaceConsumableOnGrid(g_arrConsumables[g_SelectedConsumableIndex].position, g_arrIntersections[gridIndex]);
 		}
 
 		g_SelectedConsumableIndex = -1;
@@ -162,8 +160,8 @@ void InitializeTextures() {
 	Texture tempTxtArr[g_ConsumableAmount]{ g_Obama , g_Bomb , g_Turret , g_Soldier , g_Tank };
 	for (int index{ 0 }; index < g_ConsumableAmount; index++) {
 		g_ConsumablesTextures[index] = tempTxtArr[index];
-		g_arrConsumables[index].width = g_GridSquareSize;
-		g_arrConsumables[index].height = g_GridSquareSize;
+		g_arrConsumables[index].position.width = g_GridSquareSize;
+		g_arrConsumables[index].position.height = g_GridSquareSize;
 	}
 }
 
@@ -196,8 +194,8 @@ void InitializeConsumablePositions()
 {
 	for (int index{ 0 }; index < g_ConsumableAmount; ++index)
 	{
-		g_arrConsumables[index].left = g_GridPosition.left + g_GridPosition.width + g_GridSquareSize;
-		g_arrConsumables[index].top = g_GridSquareSize + g_GridSquareSize * index;
+		g_arrConsumables[index].position.left = g_GridPosition.left + g_GridPosition.width + g_GridSquareSize;
+		g_arrConsumables[index].position.top = g_GridSquareSize + g_GridSquareSize * index;
 	}
 }
 
@@ -225,9 +223,9 @@ void CheckGridPositions()
 	}
 }
 
-void DrawItems(Rectf itemPos[], Texture texture[]) {
+void DrawItems(ConsumableInfo itemPos[], Texture texture[]) {
 	for (int i{ 0 }; i < g_ConsumableAmount; i++) {
-		DrawTexture(texture[i], itemPos[i]);
+		DrawTexture(texture[i], itemPos[i].position);
 	}
 	DrawTexture(g_Castle, g_arrIntersections[48].originLocation);
 }
@@ -251,8 +249,8 @@ void MoveConsumable(Rectf& consumable)
 
 void PutConsumableBack(const int index)
 {
-	g_arrConsumables[index].left = g_InitialConsumableLocation.x;
-	g_arrConsumables[index].top = g_InitialConsumableLocation.y;
+	g_arrConsumables[index].position.left = g_InitialConsumableLocation.x;
+	g_arrConsumables[index].position.top = g_InitialConsumableLocation.y;
 }
 
 bool IsMouseOutOfBounds()
@@ -327,8 +325,8 @@ void SelectConsumable()
 {
 	g_SelectedConsumableIndex = FindConsumable();
 	g_InitialConsumableLocation = Point2f{
-		g_arrConsumables[g_SelectedConsumableIndex].left,
-		g_arrConsumables[g_SelectedConsumableIndex].top };
+		g_arrConsumables[g_SelectedConsumableIndex].position.left,
+		g_arrConsumables[g_SelectedConsumableIndex].position.top };
 }
 
 void DrawRoadAndGrass(Rectf coord) {
@@ -467,7 +465,7 @@ void AddPathPoint(float x, float y) {
 
 void CreateSpiralPath(Rectf bounds) {
 	float left{ bounds.left };
-	float top{ 2*bounds.top };
+	float top{ 2 * bounds.top };
 	float right{ bounds.width - bounds.top };
 	float bottom{ bounds.height };
 	float targetCordX{ bounds.width / g_CollumnAmount * 9 };
@@ -509,7 +507,7 @@ void CreateSpiralPath(Rectf bounds) {
 			}
 		}
 		top += g_GridSquareSize;
-		for (float i{ left }; i < right- g_GridSquareSize; i += g_GridSquareSize) {
+		for (float i{ left }; i < right - g_GridSquareSize; i += g_GridSquareSize) {
 			if (i == left) {
 				i += g_GridSquareSize;
 			}
@@ -544,6 +542,7 @@ void SpawnEnemy() {
 	g_Enemies[g_EnemiesCount].parameters.top = g_SpirPath[0].y;
 	g_Enemies[g_EnemiesCount].movingCooldown = 0.f;
 	g_EnemiesCount++;
+	TakeDamage(g_HealthAmount, g_Enemies);
 }
 
 void EnemyMovement(float elapsedSec) {
@@ -575,4 +574,112 @@ void AddPathTilesToIntersections(Point2f* arrPathTiles, const int pathTileAmount
 	}
 }
 
+void AddConsumableParameters(ConsumableInfo* arrConsumables)
+{
+	for (int index{ 0 }; index < g_ConsumableAmount; ++index)
+	{
+		switch (static_cast<TextureNames>(index))
+		{
+		case TextureNames::Obama:
+		{
+			arrConsumables[index].radius = g_GridSquareSize;
+			arrConsumables[index].shotCooldown = 1.f;
+			break;
+		}
+		case TextureNames::Bomb:
+		{
+			arrConsumables[index].radius = g_GridSquareSize * 0.5f;
+			arrConsumables[index].shotCooldown = 1.5f;
+			break;
+		}
+		case TextureNames::Turret:
+		{
+			arrConsumables[index].radius = g_GridSquareSize * 2.f;
+			arrConsumables[index].shotCooldown = 0.7f;
+			break;
+		}
+		case TextureNames::Soldier:
+		{
+			arrConsumables[index].radius = g_GridSquareSize * 1.5f;
+			arrConsumables[index].shotCooldown = 0.5f;
+			break;
+		}
+		case TextureNames::Tank:
+		{
+			arrConsumables[index].radius = g_GridSquareSize;
+			arrConsumables[index].shotCooldown = 2.f;
+			break;
+		}
+		default:
+		{
+			break;
+		}
+		}
+	}
+}
+
+void DrawHealthBar(const int healthAmount, const int maxHealth)
+{
+	Rectf healthBar{
+		0.f,
+		g_GridSquareSize * 0.1f,
+		g_GridSquareSize * 3,
+		g_GridSquareSize * 0.8f
+	},
+		health{
+		healthBar.left,
+		healthBar.top,
+		healthBar.width / maxHealth * healthAmount,
+		healthBar.height
+	};
+
+	if (healthAmount >= (maxHealth / 3 * 2))
+	{
+		utils::SetColor(g_Green);
+	}
+	else if (healthAmount >= (maxHealth * 0.5))
+	{
+		utils::SetColor(g_Yellow);
+	}
+	else if (healthAmount >= (maxHealth / 3))
+	{
+		utils::SetColor(g_Orange);
+	}
+	else
+	{
+		utils::SetColor(g_Red);
+	}
+
+	utils::FillRect(health);
+
+	utils::SetColor(g_Black);
+	utils::DrawRect(healthBar, 3.f);
+}
+
+void TakeDamage(int& healthAmount, EnemyInfo* arrEnemies)
+{
+	for (int index{ 0 }; index < g_EnemiesCount; ++index)
+	{
+		if (arrEnemies[index].pathPosition == 36 && g_EnemySpawnTime >= g_MoveCooldown)
+		{
+			--healthAmount;
+		}
+	}
+}
+
+void Shoot(EnemyInfo* arrEnemies, ConsumableInfo* arrTowers)
+{
+	for (int tower{ 0 }; tower < g_ConsumableAmount; ++tower)
+	{
+		for (int enemy{ 0 }; enemy < g_EnemiesCap; ++enemy)
+		{
+			//if(arrEnemies[enemy].parameters.)
+		}
+	}
+}
+
+bool IsEnemyInShootingRadius(const Rectf& enemyPosition, const Ellipsef& shootingRadius)
+{
+	
+}
 #pragma endregion ownDefinitions
