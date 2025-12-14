@@ -20,6 +20,8 @@ struct ConsumableInfo {
 	Rectf position;
 	float shotCooldown;
 	float radius;
+	float timeUntilShot;
+	int shotAmount;
 };
 
 float g_TimeFlow{0};
@@ -139,12 +141,13 @@ int g_SpirPathCapacity{ 0 };
 Point2f* g_SpirPath{ nullptr };
 
 Texture g_ConsumablesTextures[g_ConsumableAmount]{};
-int g_EnemyAmmount{ 0 };
+int g_EnemyAmount{ 0 };
 EnemyInfo* g_Enemies{ nullptr };
 int g_EnemiesCount{ 0 };
 int g_EnemiesCap{ 0 };
 
 Point2f
+g_ShootTowardsCoordinate{ 0.f, 0.f },
 g_MousePosition{ 0.f, 0.f },
 g_InitialConsumableLocation{ 0.f, 0.f };
 
@@ -194,8 +197,10 @@ void AddPathTilesToIntersections(Point2f* arrPathTiles, const int pathTileAmount
 void AddConsumableParameters(ConsumableInfo* arrConsumables);
 void DrawHealthBar(const int healthAmount, const int maxHealth);
 void TakeDamage(int& healthAmount, EnemyInfo* arrEnemies);
-void Shoot(EnemyInfo* arrEnemies, ConsumableInfo* arrTowers);
-bool IsEnemyInShootingRadius(const Rectf& enemyPosition, const Ellipsef& shootingRadius);
+bool Shoot(EnemyInfo* arrEnemies, const ConsumableInfo & tower,
+	int& enemyIndex);
+Point2f IsEnemyInShootingRadius(const Rectf& enemyPosition,
+	const Point2f& shootingRadiusCenter, const float radius, bool& shouldTowerShoot);
 
 
 

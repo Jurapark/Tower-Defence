@@ -584,30 +584,35 @@ void AddConsumableParameters(ConsumableInfo* arrConsumables)
 		{
 			arrConsumables[index].radius = g_GridSquareSize;
 			arrConsumables[index].shotCooldown = 1.f;
+			arrConsumables[index].shotAmount = 1;
 			break;
 		}
 		case TextureNames::Bomb:
 		{
 			arrConsumables[index].radius = g_GridSquareSize * 0.5f;
 			arrConsumables[index].shotCooldown = 1.5f;
+			arrConsumables[index].shotAmount = 1;
 			break;
 		}
 		case TextureNames::Turret:
 		{
 			arrConsumables[index].radius = g_GridSquareSize * 2.f;
 			arrConsumables[index].shotCooldown = 0.7f;
+			arrConsumables[index].shotAmount = 1;
 			break;
 		}
 		case TextureNames::Soldier:
 		{
 			arrConsumables[index].radius = g_GridSquareSize * 1.5f;
 			arrConsumables[index].shotCooldown = 0.5f;
+			arrConsumables[index].shotAmount = 1;
 			break;
 		}
 		case TextureNames::Tank:
 		{
 			arrConsumables[index].radius = g_GridSquareSize;
 			arrConsumables[index].shotCooldown = 2.f;
+			arrConsumables[index].shotAmount = 1;
 			break;
 		}
 		default:
@@ -667,19 +672,70 @@ void TakeDamage(int& healthAmount, EnemyInfo* arrEnemies)
 	}
 }
 
-void Shoot(EnemyInfo* arrEnemies, ConsumableInfo* arrTowers)
+bool Shoot(EnemyInfo* arrEnemies, const ConsumableInfo& tower,
+	int& enemyIndex)
+{
+	bool
+		shouldTowerShoot{ false };
+
+	Point2f
+		towerCenter{
+		tower.position.left + 0.5f * tower.position.width,
+		tower.position.top + 0.5f * tower.position.height };
+
+	while (shouldTowerShoot == false && enemyIndex >= 0)
+	{
+		float
+			deltaX{ towerCenter.x - fmax(arrEnemies[enemyIndex].parameters.left,
+				fmin(towerCenter.x, arrEnemies[enemyIndex].parameters.left +
+					arrEnemies[enemyIndex].parameters.width)) },
+			deltaY{ towerCenter.y - fmax(arrEnemies[enemyIndex].parameters.top,
+				fmin(towerCenter.y, arrEnemies[enemyIndex].parameters.top +
+					arrEnemies[enemyIndex].parameters.height)) };
+
+		if ((deltaX * deltaX + deltaY * deltaY) < (tower.radius * tower.radius))
+		{
+			g_ShootTowardsCoordinate = Point2f{ deltaX, deltaY };
+			shouldTowerShoot = true;
+		}
+		--enemyIndex;
+	}
+
+	return shouldTowerShoot;
+}
+
+void DrawShots(ConsumableInfo* arrTowers, EnemyInfo* arrEnemies)
 {
 	for (int tower{ 0 }; tower < g_ConsumableAmount; ++tower)
 	{
-		for (int enemy{ 0 }; enemy < g_EnemiesCap; ++enemy)
+		int shotAmount{ arrTowers[tower].shotAmount };
+		while (shotAmount > 0)
 		{
-			//if(arrEnemies[enemy].parameters.)
+			int enemyIndex{ g_EnemyAmount };
+			if (Shoot(arrEnemies, arrTowers[tower], enemyIndex) == true)
+			{
+				Point2f
+					towerCenter{
+					arrTowers[tower].position.left + 0.5f * arrTowers[tower].position.width,
+					arrTowers[tower].position.top + 0.5f * arrTowers[tower].position.height };
+
+				utils::DrawLine(towerCenter, g_ShootTowardsCoordinate);
+			}
+			--shotAmount;
 		}
 	}
 }
 
-bool IsEnemyInShootingRadius(const Rectf& enemyPosition, const Ellipsef& shootingRadius)
+Point2f IsEnemyInShootingRadius(const Rectf& enemyPosition,
+	const Point2f& shootingRadiusCenter, const float radius, bool& shouldTowerShoot)
 {
-	
+	float deltaX{ shootingRadiusCenter.x - fmax(enemyPosition.left,
+		fmin(shootingRadiusCenter.x, enemyPosition.left + enemyPosition.width)) },
+		deltaY{ shootingRadiusCenter.y - fmax(enemyPosition.top,
+			fmin(shootingRadiusCenter.y, enemyPosition.top + enemyPosition.height)) };
+
+	shouldTowerShoot = (deltaX * deltaX + deltaY * deltaY) < (radius * radius);
+
+	return Point2f{ deltaX, deltaY };
 }
 #pragma endregion ownDefinitions
