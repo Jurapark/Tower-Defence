@@ -41,9 +41,17 @@ enum class TextureNames {
 	Soldier,
 	Tank
 };
-
+float g_ButtonWidth{ 300.f };
+float g_ButtonHeight{ 100.f };
+Rectf g_Button{
+		(g_WindowWidth / 2) - (g_ButtonWidth / 2),
+		(g_WindowHeight / 2) - (g_ButtonHeight / 2),
+		g_ButtonWidth,
+		g_ButtonHeight
+};
 bool g_YouLose{false};
 float g_MoveCooldown{ 0.5f };
+bool g_PlayPressed{ false };
 
 const int
 g_PathTileAmount{ 36 },
@@ -72,7 +80,9 @@ g_Road,
 g_Grass,
 g_Enemy,
 g_LoseScreen,
-g_Bullet;
+g_Bullet,
+g_Text,
+g_Title;
 
 
 const Rectf
@@ -196,10 +206,11 @@ BulletInfo* g_Bullets{ new BulletInfo[g_BulletCap]{} };
 float g_EnemySpawnCooldown{ 4.f };
 float g_OverallGameTime{0.f};
 float g_SpawnCooldownMinus{ 0.5f };
-float g_SpeedInterval{ 5.f };
+float g_SpeedInterval{ 20.f };
 float g_MinSpawnTime{ 0.5f };
 
 // Declare your own functions here
+void DrawStart();
 void InitializeTextures();
 void InitializeGridPositions();
 void CheckGridPositions();
@@ -238,6 +249,7 @@ void SpawnBullet(int towerIndex, int enemyIndex);
 void ShootBullet();
 void UpdateBullets();
 void DrawBullet();
+
 
 
 #pragma endregion ownDeclarations

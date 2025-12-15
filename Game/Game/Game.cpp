@@ -20,13 +20,17 @@ void Start()
 	CheckGridPositions();
 	AddConsumableParameters(g_arrConsumables);
 	
+	
 }
 
 void Draw()
 {
 	ClearBackground(0.f,0.f,0.f);
 
-	if (g_YouLose == false) {
+	if (g_PlayPressed == false) {
+		DrawStart();
+	}
+	else if (g_YouLose == false && g_PlayPressed == true) {
 		DrawRoadAndGrass(g_GridPosition);
 		TowersHitBoxes();
 		DrawItems(g_arrConsumables, g_ConsumablesTextures);
@@ -147,6 +151,14 @@ void OnMouseDownEvent(const SDL_MouseButtonEvent& e)
 		}
 
 	}
+	if (g_PlayPressed == false) {
+		if (e.button == SDL_BUTTON_LEFT) {
+			if(g_MousePosition.x >= g_Button.left && g_MousePosition.x <= g_Button.left + g_Button.width
+				&& g_MousePosition.y >= g_Button.top && g_MousePosition.y <= g_Button.top + g_ButtonHeight){
+				g_PlayPressed = true;
+			}
+		}
+	}
 }
 
 void OnMouseUpEvent(const SDL_MouseButtonEvent& e)
@@ -184,6 +196,13 @@ void OnMouseUpEvent(const SDL_MouseButtonEvent& e)
 // Define your own functions here
 
 void InitializeTextures() {
+	
+	if (!TextureFromString("PLAY", "Resources/VCR_OSD_MONO_1.001.ttf",50,g_Black,g_Text)) {
+		std::cout << "Text didnt load '\n";
+	}
+	if (!TextureFromString("Shitty Tower Defence", "Resources/VCR_OSD_MONO_1.001.ttf",1000,g_White,g_Title)) {
+		std::cout << "Title didnt load '\n";
+	}
 	if (!TextureFromFile("Resources/Obama.jpg", g_Obama)) {
 		std::cout << "Obama didnt load '\n";
 	}
@@ -1002,5 +1021,25 @@ void DrawBullet()
 	}
 }
 
+void DrawStart() {
+
+	Rectf
+		textPar{
+		g_Button.left + (g_Button.width / 4),
+		g_Button.top + (g_Button.height / 4),
+		g_ButtonWidth / 2,
+		g_ButtonHeight / 2
+	},
+		titlePar{
+		g_WindowWidth / 24*3,
+		0,
+		g_WindowWidth / 4 * 3,
+		g_WindowHeight / 4 
+	};
+	FillRect(g_Button);
+	DrawTexture(g_Text, textPar);
+	DrawTexture(g_Title, titlePar);
+
+}
 
 #pragma endregion ownDefinitions
