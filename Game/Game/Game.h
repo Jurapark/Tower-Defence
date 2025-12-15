@@ -20,7 +20,15 @@ struct ConsumableInfo {
 	Rectf position;
 	float shotCooldown;
 	float radius;
+	Rectf radius2;
+	bool isSelected{ false };
+	float damage;
+	float shootingInterval{ 1.f };
+	Point2f bulletSpawnPos;
+	
 };
+
+
 
 float g_TimeFlow{0};
 
@@ -32,7 +40,7 @@ enum class TextureNames {
 	Tank
 };
 
-
+bool g_YouLose{false};
 float g_MoveCooldown{ 0.5f };
 
 const int
@@ -60,7 +68,9 @@ g_Tank,
 g_Soldier,
 g_Road,
 g_Grass,
-g_Enemy;
+g_Enemy,
+g_LoseScreen,
+g_Bullet;
 
 
 const Rectf
@@ -91,6 +101,10 @@ struct EnemyInfo {
 	g_GridBlockSize.width,
 	g_GridBlockSize.height };
 	float movingCooldown{ 0.f };
+	float health{6};
+	bool turretInRange{ false };
+	bool isDead{ false };
+	int enemyIndex;
 };
 
 struct Grid
@@ -163,6 +177,19 @@ g_arrConsumables[g_ConsumableAmount]{
 
 float g_EnemySpawnTime{ 0.f };
 float g_Tst{ 0 };
+float g_ShootBulletTime{ 0.f };
+struct BulletInfo {
+	Texture texture;
+	Rectf parameters{
+		0.f,0.f,g_GridSquareSize, g_GridSquareSize
+	};
+	int targetEnemy;
+	bool isActive;
+
+};
+int g_BulletSize{0};
+int g_BulletCap{50};
+BulletInfo* g_Bullets{ new BulletInfo[g_BulletCap]{} };
 
 
 // Declare your own functions here
@@ -194,9 +221,16 @@ void AddPathTilesToIntersections(Point2f* arrPathTiles, const int pathTileAmount
 void AddConsumableParameters(ConsumableInfo* arrConsumables);
 void DrawHealthBar(const int healthAmount, const int maxHealth);
 void TakeDamage(int& healthAmount, EnemyInfo* arrEnemies);
-void Shoot(EnemyInfo* arrEnemies, ConsumableInfo* arrTowers);
-bool IsEnemyInShootingRadius(const Rectf& enemyPosition, const Ellipsef& shootingRadius);
-
+//bool IsEnemyInShootingRadius(const Rectf& enemyPosition, const Ellipsef& shootingRadius);
+void LoserScreen();
+void TowersHitBoxes();
+//void CheckIfTurretInRange();
+bool IsEnemyInTowerRange(int towerIndex, int enemyIndex);
+void DeleteIfDead();
+void SpawnBullet(int towerIndex, int enemyIndex);
+void ShootBullet();
+void UpdateBullets();
+void DrawBullet();
 
 
 #pragma endregion ownDeclarations

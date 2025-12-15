@@ -6,8 +6,9 @@
 #pragma region gameFunctions											
 void Start()
 {
-	g_EnemiesCount = 1;
-	g_Enemies = new EnemyInfo[g_EnemiesCount]{};
+	g_EnemiesCount = 0;
+	g_EnemiesCap = 4;
+	g_Enemies = new EnemyInfo[g_EnemiesCap]{};
 
 	InitializeTextures();
 	InitializeGridPositions();
@@ -18,17 +19,26 @@ void Start()
 	AddPathTilesToIntersections(g_SpirPath, g_SpirPathSize);
 	CheckGridPositions();
 	AddConsumableParameters(g_arrConsumables);
+	
 }
 
 void Draw()
 {
-	ClearBackground();
+	ClearBackground(0.f,0.f,0.f);
 
-	DrawRoadAndGrass(g_GridPosition);
-	DrawItems(g_arrConsumables, g_ConsumablesTextures);
-	DrawEnemies();
-	DrawGrid();
-	DrawHealthBar(g_HealthAmount, g_MaxHealthAmount);
+	if (g_YouLose == false) {
+		DrawRoadAndGrass(g_GridPosition);
+		TowersHitBoxes();
+		DrawItems(g_arrConsumables, g_ConsumablesTextures);
+		DrawEnemies();
+		//DrawGrid();
+		DrawHealthBar(g_HealthAmount, g_MaxHealthAmount);
+		DrawBullet();
+		
+	}
+	else if (g_YouLose == true) {
+		LoserScreen();
+	}
 }
 
 void Update(float elapsedSec)
@@ -36,6 +46,14 @@ void Update(float elapsedSec)
 	g_EnemySpawnTime += 1 * elapsedSec;
 	g_TimeFlow += 1 * elapsedSec;
 	g_Tst += 1 * elapsedSec;
+	g_ShootBulletTime += 1 * elapsedSec;
+	g_arrConsumables[0].shootingInterval += 1 * elapsedSec;
+	g_arrConsumables[1].shootingInterval += 1 * elapsedSec;
+	g_arrConsumables[2].shootingInterval += 1 * elapsedSec;
+	g_arrConsumables[3].shootingInterval += 1 * elapsedSec;
+	g_arrConsumables[4].shootingInterval += 1 * elapsedSec;
+	
+
 	if (g_EnemySpawnTime >= 2.f) {
 		SpawnEnemy();
 		g_EnemySpawnTime = 0;
@@ -51,7 +69,10 @@ void Update(float elapsedSec)
 	}
 
 	EnemyMovement(elapsedSec);
-
+	//CheckIfTurretInRange();
+	DeleteIfDead();
+	ShootBullet();
+	UpdateBullets();
 }
 
 void End()
@@ -103,7 +124,12 @@ void OnMouseDownEvent(const SDL_MouseButtonEvent& e)
 	}
 	else if (IsMouseOutOfGrid() == false)
 	{
-		std::cout << g_arrIntersections[GetGridIndex(g_MousePosition)].isTaken << "\n";
+		int gridIndex = GetGridIndex(g_MousePosition);
+		if (gridIndex >= 0 && gridIndex < g_GridAmount)
+		{
+			std::cout << g_arrIntersections[gridIndex].isTaken << "\n";
+		}
+
 	}
 }
 
@@ -111,15 +137,24 @@ void OnMouseUpEvent(const SDL_MouseButtonEvent& e)
 {
 	if (g_SelectedConsumableIndex != -1)
 	{
-		int gridIndex{ GetGridIndex(g_MousePosition) };
-		if (IsMouseOutOfBounds() == true || IsMouseOutOfGrid() == true || g_arrIntersections[gridIndex].isTaken)
+		int gridIndex = GetGridIndex(g_MousePosition);
+
+		if (gridIndex < 0 || gridIndex >= g_GridAmount)
+		{
+			PutConsumableBack(g_SelectedConsumableIndex);
+		}
+		else if (g_arrIntersections[gridIndex].isTaken)
 		{
 			PutConsumableBack(g_SelectedConsumableIndex);
 		}
 		else
 		{
-			PlaceConsumableOnGrid(g_arrConsumables[g_SelectedConsumableIndex].position, g_arrIntersections[gridIndex]);
+			PlaceConsumableOnGrid(
+				g_arrConsumables[g_SelectedConsumableIndex].position,
+				g_arrIntersections[gridIndex]
+			);
 		}
+
 
 		g_SelectedConsumableIndex = -1;
 	}
@@ -149,13 +184,19 @@ void InitializeTextures() {
 		std::cout << "g_Tank didnt load '\n";
 	}
 	if (!TextureFromFile("Resources/Grass.png", g_Grass)) {
-		std::cout << "g_Tank didnt load '\n";
+		std::cout << "g_Grass didnt load '\n";
 	}
 	if (!TextureFromFile("Resources/Road.png", g_Road)) {
-		std::cout << "g_Tank didnt load '\n";
+		std::cout << "g_Road didnt load '\n";
 	}
 	if (!TextureFromFile("Resources/Enemy.png", g_Enemy)) {
-		std::cout << "g_Tank didnt load '\n";
+		std::cout << "g_Enemy didnt load '\n";
+	}
+	if (!TextureFromFile("Resources/you_lose.jpg", g_LoseScreen)) {
+		std::cout << "g_LoseScreen didnt load '\n";
+	}
+	if (!TextureFromFile("Resources/bullet.png", g_Bullet)) {
+		std::cout << "g_Bullet didnt load '\n";
 	}
 	Texture tempTxtArr[g_ConsumableAmount]{ g_Obama , g_Bomb , g_Turret , g_Soldier , g_Tank };
 	for (int index{ 0 }; index < g_ConsumableAmount; index++) {
@@ -163,6 +204,7 @@ void InitializeTextures() {
 		g_arrConsumables[index].position.width = g_GridSquareSize;
 		g_arrConsumables[index].position.height = g_GridSquareSize;
 	}
+
 }
 
 void DeleteTextures() {
@@ -175,6 +217,8 @@ void DeleteTextures() {
 	DeleteTexture(g_Grass);
 	DeleteTexture(g_Road);
 	DeleteTexture(g_Enemy);
+	DeleteTexture(g_LoseScreen);
+	DeleteTexture(g_Bullet);
 }
 
 void InitializeGridPositions()
@@ -198,6 +242,29 @@ void InitializeConsumablePositions()
 		g_arrConsumables[index].position.top = g_GridSquareSize + g_GridSquareSize * index;
 	}
 }
+
+void TowersHitBoxes() {
+	g_arrConsumables[0].radius2 = Rectf{ g_arrConsumables[0].position.left - g_GridSquareSize, g_arrConsumables[0].position.top - g_GridSquareSize, g_GridSquareSize * 3, g_GridSquareSize * 3 };
+	g_arrConsumables[1].radius2 = Rectf{ g_arrConsumables[1].position.left - g_GridSquareSize, g_arrConsumables[1].position.top - g_GridSquareSize, g_GridSquareSize * 3, g_GridSquareSize * 3 };
+	g_arrConsumables[2].radius2 = Rectf{ g_arrConsumables[2].position.left, g_arrConsumables[2].position.top, g_GridSquareSize * 8, g_GridSquareSize };
+	g_arrConsumables[3].radius2 = Rectf{ g_arrConsumables[3].position.left, g_arrConsumables[3].position.top - g_GridSquareSize * 3, g_GridSquareSize, g_GridSquareSize * 3 };
+	g_arrConsumables[4].radius2 = Rectf{ g_arrConsumables[4].position.left, g_arrConsumables[4].position.top, g_GridSquareSize * 8, g_GridSquareSize };
+	g_arrConsumables[0].shotCooldown = 2.f;
+	g_arrConsumables[1].shotCooldown = 10.f;
+	g_arrConsumables[2].shotCooldown = 0.5f;
+	g_arrConsumables[3].shotCooldown = 1.f;
+	g_arrConsumables[4].shotCooldown = 3.f;
+	g_arrConsumables[0].damage = 1.f;
+	g_arrConsumables[1].damage = 4.f;
+	g_arrConsumables[2].damage = 0.3f;
+	g_arrConsumables[3].damage = 0.7f;
+	g_arrConsumables[4].damage = 2.f;
+	g_arrConsumables[0].bulletSpawnPos = Point2f{ g_arrConsumables[0].position.left, g_arrConsumables[0].position.top };
+	g_arrConsumables[1].bulletSpawnPos = Point2f{ g_arrConsumables[1].position.left, g_arrConsumables[1].position.top };
+	g_arrConsumables[2].bulletSpawnPos = Point2f{ g_arrConsumables[2].position.left + g_GridSquareSize, g_arrConsumables[2].position.top };
+	g_arrConsumables[3].bulletSpawnPos = Point2f{ g_arrConsumables[3].position.left, g_arrConsumables[3].position.top - g_GridSquareSize };
+	g_arrConsumables[4].bulletSpawnPos = Point2f{ g_arrConsumables[4].position.left + g_GridSquareSize, g_arrConsumables[4].position.top };
+ }
 
 void DrawGrid()
 {
@@ -226,18 +293,26 @@ void CheckGridPositions()
 void DrawItems(ConsumableInfo itemPos[], Texture texture[]) {
 	for (int i{ 0 }; i < g_ConsumableAmount; i++) {
 		DrawTexture(texture[i], itemPos[i].position);
+		if (g_arrConsumables[i].isSelected == true) {
+			SetColor(g_Red);
+			DrawRect(g_arrConsumables[i].radius2);
+		}
 	}
-	DrawTexture(g_Castle, g_arrIntersections[48].originLocation);
+	int castleIndex = (g_RowAmount - 1) * g_CollumnAmount + (g_CollumnAmount / 2);
 }
 
 void ClickConsumableToGrid(Rectf& consumable)
 {
 	if (g_MousePosition.x < (g_GridPosition.left + g_GridPosition.width))
 	{
-		int gridIndex{ GetGridIndex(g_MousePosition) };
+		int gridIndex = GetGridIndex(g_MousePosition);
+		if (gridIndex >= 0 && gridIndex < g_GridAmount)
+		{
+			consumable.left = g_arrIntersections[gridIndex].originLocation.x;
+			consumable.top = g_arrIntersections[gridIndex].originLocation.y;
+		}
 
-		consumable.left = g_arrIntersections[gridIndex].originLocation.x;
-		consumable.top = g_arrIntersections[gridIndex].originLocation.y;
+
 	}
 }
 
@@ -251,6 +326,7 @@ void PutConsumableBack(const int index)
 {
 	g_arrConsumables[index].position.left = g_InitialConsumableLocation.x;
 	g_arrConsumables[index].position.top = g_InitialConsumableLocation.y;
+	g_arrConsumables[index].isSelected = false;
 }
 
 bool IsMouseOutOfBounds()
@@ -324,9 +400,16 @@ void PlaceConsumableOnGrid(Rectf& consumable, Grid& intersection)
 void SelectConsumable()
 {
 	g_SelectedConsumableIndex = FindConsumable();
+	if (g_SelectedConsumableIndex < 0
+		|| g_SelectedConsumableIndex >= g_ConsumableAmount)
+	{
+		g_SelectedConsumableIndex = -1;
+		return;
+	}
 	g_InitialConsumableLocation = Point2f{
 		g_arrConsumables[g_SelectedConsumableIndex].position.left,
 		g_arrConsumables[g_SelectedConsumableIndex].position.top };
+	g_arrConsumables[g_SelectedConsumableIndex].isSelected = true;
 }
 
 void DrawRoadAndGrass(Rectf coord) {
@@ -402,7 +485,12 @@ void DrawRoadAndGrass(Rectf coord) {
 	for (int i{ 0 }; i < g_GridAmount; i++) {
 		if (loops < loopAmm2) {
 			DrawTexture(g_Road, curCord2);
-			g_arrIntersections[GetGridIndex(curCord2.left, curCord2.top)].isTaken = true;
+			int idx = GetGridIndex(curCord2.left, curCord2.top);
+			if (idx >= 0 && idx < g_GridAmount)
+			{
+				g_arrIntersections[idx].isTaken = true;
+			}
+
 		}
 		if (goDown == true) {
 			curCord2.top += g_GridSquareSize;
@@ -424,7 +512,12 @@ void DrawRoadAndGrass(Rectf coord) {
 			loops++;
 			if (loops == loopAmm2) {
 				DrawTexture(g_Road, curCord2);
-				g_arrIntersections[GetGridIndex(curCord2.left, curCord2.top)].isTaken = true;
+				int idx = GetGridIndex(curCord2.left, curCord2.top);
+				if (idx >= 0 && idx < g_GridAmount)
+				{
+					g_arrIntersections[idx].isTaken = true;
+				}
+
 			}
 		}
 		else if (curCord2.top == coord.height && goDown == true) {
@@ -452,7 +545,7 @@ void AddPathPoint(float x, float y) {
 	if (g_SpirPathSize == g_SpirPathCapacity) {
 		g_SpirPathCapacity = g_SpirPathCapacity * 2;
 		Point2f* newArr{ new Point2f[g_SpirPathCapacity]{} };
-		for (int i{ 0 }; i < g_SpirPathCapacity; i++) {
+		for (int i{ 0 }; i < g_SpirPathSize; i++) {
 			newArr[i] = g_SpirPath[i];
 		}
 		delete[] g_SpirPath;
@@ -527,7 +620,7 @@ void EnemyCapacity() {
 			g_EnemiesCap = g_EnemiesCap * 2;
 		}
 		EnemyInfo* newArr{ new EnemyInfo[g_EnemiesCap]{} };
-		for (int i{ 0 }; i < g_EnemiesCap; i++) {
+		for (int i{ 0 }; i < g_EnemiesCount; i++) {
 			newArr[i] = g_Enemies[i];
 		}
 		delete[] g_Enemies;
@@ -541,6 +634,8 @@ void SpawnEnemy() {
 	g_Enemies[g_EnemiesCount].parameters.left = g_SpirPath[0].x;
 	g_Enemies[g_EnemiesCount].parameters.top = g_SpirPath[0].y;
 	g_Enemies[g_EnemiesCount].movingCooldown = 0.f;
+	g_Enemies[g_EnemiesCount].health = 6.f;
+	g_Enemies[g_EnemiesCount].isDead = false;
 	g_EnemiesCount++;
 	TakeDamage(g_HealthAmount, g_Enemies);
 }
@@ -562,6 +657,7 @@ void DrawEnemies() {
 		g_Enemies[i].texture = g_Enemy;
 		g_Enemies[i].parameters.width = g_GridSquareSize;
 		g_Enemies[i].parameters.height = g_GridSquareSize;
+		g_Enemies[i].enemyIndex = i;
 		DrawTexture(g_Enemies[i].texture, g_Enemies[i].parameters);
 	}
 }
@@ -570,7 +666,12 @@ void AddPathTilesToIntersections(Point2f* arrPathTiles, const int pathTileAmount
 {
 	for (int index{ 0 }; index < pathTileAmount; ++index)
 	{
-		g_arrIntersections[GetGridIndex(arrPathTiles[index].x, arrPathTiles[index].y)].isTaken = true;
+		int idx = GetGridIndex(arrPathTiles[index].x, arrPathTiles[index].y);
+		if (idx >= 0 && idx < g_GridAmount)
+		{
+			g_arrIntersections[idx].isTaken = true;
+		}
+
 	}
 }
 
@@ -660,26 +761,182 @@ void TakeDamage(int& healthAmount, EnemyInfo* arrEnemies)
 {
 	for (int index{ 0 }; index < g_EnemiesCount; ++index)
 	{
-		if (arrEnemies[index].pathPosition == 36 && g_EnemySpawnTime >= g_MoveCooldown)
+		if (arrEnemies[index].pathPosition == 36 && g_EnemySpawnTime >= g_MoveCooldown && arrEnemies[index].isDead == false)
 		{
 			--healthAmount;
+			if (healthAmount <= 0) {
+				g_YouLose = true;
+			}
 		}
 	}
 }
 
-void Shoot(EnemyInfo* arrEnemies, ConsumableInfo* arrTowers)
-{
-	for (int tower{ 0 }; tower < g_ConsumableAmount; ++tower)
-	{
-		for (int enemy{ 0 }; enemy < g_EnemiesCap; ++enemy)
-		{
-			//if(arrEnemies[enemy].parameters.)
-		}
-	}
-}
 
-bool IsEnemyInShootingRadius(const Rectf& enemyPosition, const Ellipsef& shootingRadius)
-{
+//bool IsEnemyInShootingRadius(const Rectf& enemyPosition, const Ellipsef& shootingRadius)
+//{
+//	
+//}
+
+void LoserScreen() {
+	DrawTexture(g_LoseScreen, Rectf{ 0.f,0.f,g_WindowWidth, g_WindowHeight });
 	
 }
+//void CheckIfTurretInRange()
+//{
+//	for (int i{ 0 }; i < g_EnemiesCount; ++i)
+//	{
+//		g_Enemies[i].turretInRange = false;
+//
+//		for (int index{ 0 }; index < g_ConsumableAmount; ++index)
+//		{
+//			if (g_Enemies[i].parameters.left >= g_arrConsumables[index].radius2.left
+//				&& g_Enemies[i].parameters.left + g_Enemies[i].parameters.width <= g_arrConsumables[index].radius2.left + g_arrConsumables[index].radius2.width
+//				&& g_Enemies[i].parameters.top >= g_arrConsumables[index].radius2.top
+//				&& g_Enemies[i].parameters.top + g_Enemies[i].parameters.height <= g_arrConsumables[index].radius2.top + g_arrConsumables[index].radius2.height)
+//			{
+//				g_Enemies[i].turretInRange = true;
+//				break;
+//			}
+//		}
+//	}
+//}
+
+bool IsEnemyInTowerRange(int towerIndex, int enemyIndex){
+	if (g_Enemies[enemyIndex].parameters.left >= g_arrConsumables[towerIndex].radius2.left &&
+		g_Enemies[enemyIndex].parameters.left + g_Enemies[enemyIndex].parameters.width
+		<= g_arrConsumables[towerIndex].radius2.left + g_arrConsumables[towerIndex].radius2.width &&
+		g_Enemies[enemyIndex].parameters.top >= g_arrConsumables[towerIndex].radius2.top &&
+		g_Enemies[enemyIndex].parameters.top + g_Enemies[enemyIndex].parameters.height
+		<= g_arrConsumables[towerIndex].radius2.top + g_arrConsumables[towerIndex].radius2.height) {
+		return true;
+	}
+	else {
+		return false;
+	}
+		
+}
+
+
+void DeleteIfDead()
+{
+	int aliveCount{ 0 };
+	for (int i{ 0 }; i < g_EnemiesCount; ++i)
+	{
+		if (!g_Enemies[i].isDead)
+		{
+			++aliveCount;
+		}
+	}
+	if (aliveCount == g_EnemiesCount){ return; }
+	EnemyInfo* newEnemies{ new EnemyInfo[aliveCount]{} };
+	int index{ 0 };
+	for (int i{ 0 }; i < g_EnemiesCount; ++i)
+	{
+		if (!g_Enemies[i].isDead)
+		{
+			newEnemies[index] = g_Enemies[i];
+			index++;
+		}
+	}
+	if (g_Enemies != nullptr) { //Had an error here for a while so AI helped me by telling me to check if g_Enemies is not = nullptr
+		delete[] g_Enemies;
+	}
+	g_Enemies = newEnemies;
+	g_EnemiesCount = aliveCount;
+	g_EnemiesCap = aliveCount;
+}
+
+void SpawnBullet(int towerIndex, int enemyIndex)
+{
+	for (int i{ 0 }; i < g_BulletCap; ++i)
+	{
+		if (!g_Bullets[i].isActive)
+		{
+			g_Bullets[i].isActive = true;
+			g_Bullets[i].targetEnemy = enemyIndex;
+
+			g_Bullets[i].parameters = Rectf{
+				g_arrConsumables[towerIndex].position.left + g_GridSquareSize / 2,
+				g_arrConsumables[towerIndex].position.top + g_GridSquareSize / 2,
+				10.f,
+				10.f
+			};
+			return;
+		}
+	}
+}
+
+
+void ShootBullet()
+{
+	for (int i = 0; i < g_ConsumableAmount; ++i){
+		if (g_arrConsumables[i].shootingInterval >= g_arrConsumables[i].shotCooldown) {
+			for (int index = 0; index < g_EnemiesCount; ++index){
+				if (g_Enemies[index].isDead == false) {
+					if (IsEnemyInTowerRange(i, index))
+					{
+						SpawnBullet(i, index);
+						g_arrConsumables[i].shootingInterval = 0.f;
+						break;
+					}
+				}	
+			}
+		}	
+	}
+}
+void UpdateBullets()
+{
+	for (int i = 0; i < g_BulletCap; ++i)
+	{
+		if (g_Bullets[i].isActive == true)
+		{
+			int enemyIndex = g_Bullets[i].targetEnemy;
+
+			if (enemyIndex < g_EnemiesCount && g_Enemies[enemyIndex].isDead == false)
+			{
+				if (g_Bullets[i].parameters.left + g_Bullets[i].parameters.width/2 != g_Enemies[enemyIndex].parameters.left + g_Enemies[enemyIndex].parameters.width /2) {
+					if (g_Bullets[i].parameters.left < g_Enemies[enemyIndex].parameters.left)
+						g_Bullets[i].parameters.left++;
+					else if (g_Bullets[i].parameters.left > g_Enemies[enemyIndex].parameters.left)
+						g_Bullets[i].parameters.left--;
+				}
+
+				if (g_Bullets[i].parameters.top + g_Bullets[i].parameters.height / 2 != g_Enemies[enemyIndex].parameters.top + g_Enemies[enemyIndex].parameters.height / 2) {
+					if (g_Bullets[i].parameters.top < g_Enemies[enemyIndex].parameters.top)
+						g_Bullets[i].parameters.top++;
+					else if (g_Bullets[i].parameters.top > g_Enemies[enemyIndex].parameters.top)
+						g_Bullets[i].parameters.top--;
+				}
+
+				if (utils::IsOverlapping(g_Bullets[i].parameters,
+					g_Enemies[enemyIndex].parameters)) //I asked AI how to simplify the overlapping function because I didn't want to write a lot of code and I'm running out of time, and the AI showed me that I can use IsOverlapping here
+				{
+					g_Enemies[enemyIndex].health -= 1.f;
+					g_Bullets[i].isActive = false;
+
+					if (g_Enemies[enemyIndex].health <= 0)
+						g_Enemies[enemyIndex].isDead = true;
+				}
+			}
+			else
+			{
+				g_Bullets[i].isActive = false;
+			}
+		}
+	}
+}
+
+
+void DrawBullet()
+{
+	for (int i = 0; i < g_BulletCap; ++i)
+	{
+		if (g_Bullets[i].isActive)
+		{
+			DrawTexture(g_Bullet, g_Bullets[i].parameters);
+		}
+	}
+}
+
+
 #pragma endregion ownDefinitions
