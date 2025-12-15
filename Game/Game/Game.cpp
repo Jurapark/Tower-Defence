@@ -47,14 +47,20 @@ void Update(float elapsedSec)
 	g_TimeFlow += 1 * elapsedSec;
 	g_Tst += 1 * elapsedSec;
 	g_ShootBulletTime += 1 * elapsedSec;
+	g_OverallGameTime += 1 * elapsedSec;
 	g_arrConsumables[0].shootingInterval += 1 * elapsedSec;
 	g_arrConsumables[1].shootingInterval += 1 * elapsedSec;
 	g_arrConsumables[2].shootingInterval += 1 * elapsedSec;
 	g_arrConsumables[3].shootingInterval += 1 * elapsedSec;
 	g_arrConsumables[4].shootingInterval += 1 * elapsedSec;
-	
 
-	if (g_EnemySpawnTime >= 2.f) {
+	if (g_OverallGameTime >= g_SpeedInterval && g_SpeedInterval > g_MinSpawnTime) {
+		g_EnemySpawnCooldown -= g_SpawnCooldownMinus;
+		g_OverallGameTime = 0.f;
+
+	}
+
+	if (g_EnemySpawnTime >= g_EnemySpawnCooldown) {
 		SpawnEnemy();
 		g_EnemySpawnTime = 0;
 	}
@@ -67,6 +73,7 @@ void Update(float elapsedSec)
 	{
 		PutConsumableBack(g_SelectedConsumableIndex);
 	}
+	if (g_OverallGameTime)
 
 	EnemyMovement(elapsedSec);
 	//CheckIfTurretInRange();
@@ -86,7 +93,16 @@ void End()
 #pragma region inputHandling											
 void OnKeyDownEvent(SDL_Keycode key)
 {
-
+	if (key == SDLK_r) {
+		for (int i{ 0 }; i < g_ConsumableAmount; i++) {
+			if (g_arrConsumables[i].isSelected == true) {
+				g_arrConsumables[i].RotationIndex += 1;
+				if (g_arrConsumables[i].RotationIndex >= 4){
+					g_arrConsumables[i].RotationIndex = 0;
+				}
+			}
+		}
+	}
 }
 
 void OnKeyUpEvent(SDL_Keycode key)
@@ -157,6 +173,9 @@ void OnMouseUpEvent(const SDL_MouseButtonEvent& e)
 
 
 		g_SelectedConsumableIndex = -1;
+	}
+	for (int i{ 0 }; i < g_ConsumableAmount; i++) {
+		g_arrConsumables[i].isSelected = false;
 	}
 }
 #pragma endregion inputHandling
@@ -246,9 +265,55 @@ void InitializeConsumablePositions()
 void TowersHitBoxes() {
 	g_arrConsumables[0].radius2 = Rectf{ g_arrConsumables[0].position.left - g_GridSquareSize, g_arrConsumables[0].position.top - g_GridSquareSize, g_GridSquareSize * 3, g_GridSquareSize * 3 };
 	g_arrConsumables[1].radius2 = Rectf{ g_arrConsumables[1].position.left - g_GridSquareSize, g_arrConsumables[1].position.top - g_GridSquareSize, g_GridSquareSize * 3, g_GridSquareSize * 3 };
-	g_arrConsumables[2].radius2 = Rectf{ g_arrConsumables[2].position.left, g_arrConsumables[2].position.top, g_GridSquareSize * 8, g_GridSquareSize };
-	g_arrConsumables[3].radius2 = Rectf{ g_arrConsumables[3].position.left, g_arrConsumables[3].position.top - g_GridSquareSize * 3, g_GridSquareSize, g_GridSquareSize * 3 };
-	g_arrConsumables[4].radius2 = Rectf{ g_arrConsumables[4].position.left, g_arrConsumables[4].position.top, g_GridSquareSize * 8, g_GridSquareSize };
+	if (g_arrConsumables[2].RotationIndex == 0) {
+		g_arrConsumables[2].radius2 = Rectf{ g_arrConsumables[2].position.left, g_arrConsumables[2].position.top, g_GridSquareSize * 8, g_GridSquareSize };
+
+	}
+	else if (g_arrConsumables[2].RotationIndex == 1) {
+		g_arrConsumables[2].radius2 = Rectf{ g_arrConsumables[2].position.left, g_arrConsumables[2].position.top,  g_GridSquareSize, g_GridSquareSize * 8 };
+
+	}
+	else if (g_arrConsumables[2].RotationIndex == 2) {
+		g_arrConsumables[2].radius2 = Rectf{ g_arrConsumables[2].position.left - (g_GridSquareSize * 8), g_arrConsumables[2].position.top, g_GridSquareSize * 8,g_GridSquareSize };
+
+	}
+	else if (g_arrConsumables[2].RotationIndex == 3) {
+		g_arrConsumables[2].radius2 = Rectf{ g_arrConsumables[2].position.left, g_arrConsumables[2].position.top - (g_GridSquareSize * 8),  g_GridSquareSize, g_GridSquareSize * 8 };
+
+	}
+	
+	if (g_arrConsumables[3].RotationIndex == 0) {
+		g_arrConsumables[3].radius2 = Rectf{ g_arrConsumables[3].position.left, g_arrConsumables[3].position.top - g_GridSquareSize * 3, g_GridSquareSize, g_GridSquareSize * 3 };
+	}
+	else if (g_arrConsumables[3].RotationIndex == 1) {
+		g_arrConsumables[3].radius2 = Rectf{ g_arrConsumables[3].position.left + g_GridSquareSize, g_arrConsumables[3].position.top , g_GridSquareSize * 3, g_GridSquareSize };
+
+	}
+	else if (g_arrConsumables[3].RotationIndex == 2) {
+		g_arrConsumables[3].radius2 = Rectf{ g_arrConsumables[3].position.left, g_arrConsumables[3].position.top + g_GridSquareSize , g_GridSquareSize, g_GridSquareSize * 3 };
+
+	}
+	else if (g_arrConsumables[3].RotationIndex == 3) {
+		g_arrConsumables[3].radius2 = Rectf{ g_arrConsumables[3].position.left - (g_GridSquareSize*3), g_arrConsumables[3].position.top ,  g_GridSquareSize * 3, g_GridSquareSize };
+
+	}
+	
+	if (g_arrConsumables[4].RotationIndex == 0) {
+		g_arrConsumables[4].radius2 = Rectf{ g_arrConsumables[4].position.left, g_arrConsumables[4].position.top, g_GridSquareSize * 6, g_GridSquareSize };
+
+	} 
+	else if (g_arrConsumables[4].RotationIndex == 1) {
+		g_arrConsumables[4].radius2 = Rectf{ g_arrConsumables[4].position.left, g_arrConsumables[4].position.top, g_GridSquareSize, g_GridSquareSize * 6};
+
+	}
+	else if (g_arrConsumables[4].RotationIndex == 2) {
+		g_arrConsumables[4].radius2 = Rectf{ g_arrConsumables[4].position.left - (g_GridSquareSize * 6),g_arrConsumables[4].position.top, g_GridSquareSize * 6,  g_GridSquareSize };
+
+	}
+	else if (g_arrConsumables[4].RotationIndex == 3) {
+		g_arrConsumables[4].radius2 = Rectf{ g_arrConsumables[4].position.left, g_arrConsumables[4].position.top - (g_GridSquareSize * 6), g_GridSquareSize, g_GridSquareSize * 6};
+
+	}
 	g_arrConsumables[0].shotCooldown = 2.f;
 	g_arrConsumables[1].shotCooldown = 10.f;
 	g_arrConsumables[2].shotCooldown = 0.5f;
@@ -264,7 +329,8 @@ void TowersHitBoxes() {
 	g_arrConsumables[2].bulletSpawnPos = Point2f{ g_arrConsumables[2].position.left + g_GridSquareSize, g_arrConsumables[2].position.top };
 	g_arrConsumables[3].bulletSpawnPos = Point2f{ g_arrConsumables[3].position.left, g_arrConsumables[3].position.top - g_GridSquareSize };
 	g_arrConsumables[4].bulletSpawnPos = Point2f{ g_arrConsumables[4].position.left + g_GridSquareSize, g_arrConsumables[4].position.top };
- }
+	std::cout << g_arrConsumables[2].RotationIndex << '\n';
+}
 
 void DrawGrid()
 {
@@ -298,7 +364,8 @@ void DrawItems(ConsumableInfo itemPos[], Texture texture[]) {
 			DrawRect(g_arrConsumables[i].radius2);
 		}
 	}
-	int castleIndex = (g_RowAmount - 1) * g_CollumnAmount + (g_CollumnAmount / 2);
+	utils::DrawTexture(g_Castle, g_arrIntersections[48].originLocation);
+	
 }
 
 void ClickConsumableToGrid(Rectf& consumable)
@@ -395,6 +462,10 @@ void PlaceConsumableOnGrid(Rectf& consumable, Grid& intersection)
 	consumable.left = intersection.originLocation.x;
 	consumable.top = intersection.originLocation.y;
 	intersection.isTaken = true;
+	for (int i{ 0 }; i < g_ConsumableAmount; i++) {
+		g_arrConsumables[i].isSelected == false;
+	}
+	
 }
 
 void SelectConsumable()
@@ -719,7 +790,7 @@ void AddConsumableParameters(ConsumableInfo* arrConsumables)
 	}
 }
 
-void DrawHealthBar(const int healthAmount, const int maxHealth)
+void DrawHealthBar(int& healthAmount, const int maxHealth)
 {
 	Rectf healthBar{
 		0.f,
@@ -761,7 +832,7 @@ void TakeDamage(int& healthAmount, EnemyInfo* arrEnemies)
 {
 	for (int index{ 0 }; index < g_EnemiesCount; ++index)
 	{
-		if (arrEnemies[index].pathPosition == 36 && g_EnemySpawnTime >= g_MoveCooldown && arrEnemies[index].isDead == false)
+		if (arrEnemies[index].pathPosition == 36  && arrEnemies[index].isDead == false)
 		{
 			--healthAmount;
 			if (healthAmount <= 0) {
@@ -770,12 +841,6 @@ void TakeDamage(int& healthAmount, EnemyInfo* arrEnemies)
 		}
 	}
 }
-
-
-//bool IsEnemyInShootingRadius(const Rectf& enemyPosition, const Ellipsef& shootingRadius)
-//{
-//	
-//}
 
 void LoserScreen() {
 	DrawTexture(g_LoseScreen, Rectf{ 0.f,0.f,g_WindowWidth, g_WindowHeight });
@@ -838,7 +903,7 @@ void DeleteIfDead()
 			index++;
 		}
 	}
-	if (g_Enemies != nullptr) { //Had an error here for a while so AI helped me by telling me to check if g_Enemies is not = nullptr
+	if (g_Enemies != nullptr) { 
 		delete[] g_Enemies;
 	}
 	g_Enemies = newEnemies;
@@ -858,8 +923,8 @@ void SpawnBullet(int towerIndex, int enemyIndex)
 			g_Bullets[i].parameters = Rectf{
 				g_arrConsumables[towerIndex].position.left + g_GridSquareSize / 2,
 				g_arrConsumables[towerIndex].position.top + g_GridSquareSize / 2,
-				10.f,
-				10.f
+				20.f,
+				20.f
 			};
 			return;
 		}
@@ -909,8 +974,7 @@ void UpdateBullets()
 				}
 
 				if (utils::IsOverlapping(g_Bullets[i].parameters,
-					g_Enemies[enemyIndex].parameters)) //I asked AI how to simplify the overlapping function because I didn't want to write a lot of code and I'm running out of time, and the AI showed me that I can use IsOverlapping here
-				{
+					g_Enemies[enemyIndex].parameters)) {
 					g_Enemies[enemyIndex].health -= 1.f;
 					g_Bullets[i].isActive = false;
 

@@ -25,6 +25,8 @@ struct ConsumableInfo {
 	float damage;
 	float shootingInterval{ 1.f };
 	Point2f bulletSpawnPos;
+	int RotationIndex{ 0 };
+	bool isOnGrid{ false };
 	
 };
 
@@ -191,6 +193,11 @@ int g_BulletSize{0};
 int g_BulletCap{50};
 BulletInfo* g_Bullets{ new BulletInfo[g_BulletCap]{} };
 
+float g_EnemySpawnCooldown{ 4.f };
+float g_OverallGameTime{0.f};
+float g_SpawnCooldownMinus{ 0.5f };
+float g_SpeedInterval{ 5.f };
+float g_MinSpawnTime{ 0.5f };
 
 // Declare your own functions here
 void InitializeTextures();
@@ -219,7 +226,7 @@ void PlaceConsumableOnGrid(Rectf& consumable, Grid& intersection);
 void SelectConsumable();
 void AddPathTilesToIntersections(Point2f* arrPathTiles, const int pathTileAmount);
 void AddConsumableParameters(ConsumableInfo* arrConsumables);
-void DrawHealthBar(const int healthAmount, const int maxHealth);
+void DrawHealthBar(int& healthAmount, const int maxHealth);
 void TakeDamage(int& healthAmount, EnemyInfo* arrEnemies);
 //bool IsEnemyInShootingRadius(const Rectf& enemyPosition, const Ellipsef& shootingRadius);
 void LoserScreen();
