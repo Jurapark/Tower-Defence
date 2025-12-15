@@ -333,16 +333,16 @@ void TowersHitBoxes() {
 		g_arrConsumables[4].radius2 = Rectf{ g_arrConsumables[4].position.left, g_arrConsumables[4].position.top - (g_GridSquareSize * 6), g_GridSquareSize, g_GridSquareSize * 6};
 
 	}
-	g_arrConsumables[0].shotCooldown = 2.f;
-	g_arrConsumables[1].shotCooldown = 10.f;
-	g_arrConsumables[2].shotCooldown = 0.5f;
-	g_arrConsumables[3].shotCooldown = 1.f;
-	g_arrConsumables[4].shotCooldown = 3.f;
-	g_arrConsumables[0].damage = 1.f;
-	g_arrConsumables[1].damage = 4.f;
-	g_arrConsumables[2].damage = 0.3f;
-	g_arrConsumables[3].damage = 0.7f;
-	g_arrConsumables[4].damage = 2.f;
+	g_arrConsumables[0].shotCooldown = 1.f;
+	g_arrConsumables[1].shotCooldown = 4.f;
+	g_arrConsumables[2].shotCooldown = 0.3f;
+	g_arrConsumables[3].shotCooldown = 0.5f;
+	g_arrConsumables[4].shotCooldown = 1.5f;
+	g_arrConsumables[0].damage = 3.f;
+	g_arrConsumables[1].damage = 6.f;
+	g_arrConsumables[2].damage = 1.f;
+	g_arrConsumables[3].damage = 2.f;
+	g_arrConsumables[4].damage = 10.f;
 	g_arrConsumables[0].bulletSpawnPos = Point2f{ g_arrConsumables[0].position.left, g_arrConsumables[0].position.top };
 	g_arrConsumables[1].bulletSpawnPos = Point2f{ g_arrConsumables[1].position.left, g_arrConsumables[1].position.top };
 	g_arrConsumables[2].bulletSpawnPos = Point2f{ g_arrConsumables[2].position.left + g_GridSquareSize, g_arrConsumables[2].position.top };
@@ -980,21 +980,21 @@ void UpdateBullets()
 			{
 				if (g_Bullets[i].parameters.left + g_Bullets[i].parameters.width/2 != g_Enemies[enemyIndex].parameters.left + g_Enemies[enemyIndex].parameters.width /2) {
 					if (g_Bullets[i].parameters.left < g_Enemies[enemyIndex].parameters.left)
-						g_Bullets[i].parameters.left++;
+						g_Bullets[i].parameters.left+=2;
 					else if (g_Bullets[i].parameters.left > g_Enemies[enemyIndex].parameters.left)
-						g_Bullets[i].parameters.left--;
+						g_Bullets[i].parameters.left-=2;
 				}
 
 				if (g_Bullets[i].parameters.top + g_Bullets[i].parameters.height / 2 != g_Enemies[enemyIndex].parameters.top + g_Enemies[enemyIndex].parameters.height / 2) {
 					if (g_Bullets[i].parameters.top < g_Enemies[enemyIndex].parameters.top)
-						g_Bullets[i].parameters.top++;
+						g_Bullets[i].parameters.top+=2;
 					else if (g_Bullets[i].parameters.top > g_Enemies[enemyIndex].parameters.top)
-						g_Bullets[i].parameters.top--;
+						g_Bullets[i].parameters.top-=2;
 				}
 
 				if (utils::IsOverlapping(g_Bullets[i].parameters,
 					g_Enemies[enemyIndex].parameters)) {
-					g_Enemies[enemyIndex].health -= 1.f;
+					g_Enemies[enemyIndex].health -= g_arrConsumables[i].damage;
 					g_Bullets[i].isActive = false;
 
 					if (g_Enemies[enemyIndex].health <= 0)
